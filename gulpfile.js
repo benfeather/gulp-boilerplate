@@ -50,13 +50,14 @@ const scripts = {
 // --------------------------------------------------
 
 const buildTasks = [];
+
 const watchTasks = [];
 
 // --------------------------------------------------
 // Gulp: Compile Sass
 // --------------------------------------------------
 
-const styleBuildTask = function(task) {
+const cssBuildTask = function(task) {
 
     const processors = [
         autoprefixer,
@@ -81,12 +82,11 @@ const styleBuildTask = function(task) {
     });
 }
 
-const styleWatchTask = function(task) {
+const cssWatchTask = function(task) {
     gulp.task(task.watchName, function() {
         return gulp.watch(task.files, gulp.series(task.buildName));
     });
 }
-
 
 for (const [name, files] of Object.entries(styles.bundles)) {
 
@@ -97,8 +97,8 @@ for (const [name, files] of Object.entries(styles.bundles)) {
         'files': files
     }
 
-    styleBuildTask(task);
-    styleWatchTask(task);
+    cssBuildTask(task);
+    cssWatchTask(task);
 
     buildTasks.push(task.buildName);
     watchTasks.push(task.watchName);
@@ -108,7 +108,7 @@ for (const [name, files] of Object.entries(styles.bundles)) {
 // Gulp: Compile JavaScript
 // --------------------------------------------------
 
-const scriptBuildTask = function(task) {
+const jsBuildTask = function(task) {
     gulp.task(task.buildName, function() {
         return pipeline(
             gulp.src(task.files),
@@ -122,7 +122,7 @@ const scriptBuildTask = function(task) {
     });
 }
 
-const scriptWatchTask = function(task) {
+const jsWatchTask = function(task) {
     gulp.task(task.watchName, function() {
         return gulp.watch(task.files, gulp.series(task.buildName));
     });
@@ -137,8 +137,8 @@ for (const [name, files] of Object.entries(scripts.bundles)) {
         'files': files
     }
 
-    scriptBuildTask(task);
-    scriptWatchTask(task);
+    jsBuildTask(task);
+    jsWatchTask(task);
 
     buildTasks.push(task.buildName);
     watchTasks.push(task.watchName);
