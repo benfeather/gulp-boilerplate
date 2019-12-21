@@ -1,3 +1,6 @@
+'use strict';
+
+// --------------------------------------------------
 // Require
 // --------------------------------------------------
 
@@ -5,6 +8,7 @@
 const gulp          = require('gulp');
 const rename        = require('gulp-rename');
 const sourcemaps    = require('gulp-sourcemaps');
+const { pipeline }  = require('readable-stream');
 
 // CSS
 const sass          = require('gulp-sass');
@@ -14,7 +18,10 @@ const cssnano       = require('cssnano');
 
 // JS
 const concat        = require('gulp-concat');
+const babel         = require('gulp-babel');
+const terser        = require('gulp-terser');
 
+// --------------------------------------------------
 // Settings & Configuration
 // --------------------------------------------------
 
@@ -38,58 +45,110 @@ const scripts = {
     }
 };
 
+// --------------------------------------------------
+// Vars
+// --------------------------------------------------
+
+const buildTasks = [];
+const watchTasks = [];
+
+// --------------------------------------------------
 // Gulp: Compile Sass
 // --------------------------------------------------
 
-const processors = [
-    autoprefixer,
-    cssnano
-];
+const styleBuildTask = function(task) {
 
-var cssBundles = Object.keys(styles.bundles);
+    const processors = [
+        autoprefixer,
+        cssnano
+    ];
 
-cssBundles.forEach(function(bundleName) {
     const filename = {                              
-        basename: bundleName,
+        basename: task.name,
         suffix: '.min'
     };
 
-    gulp.task(bundleName, function () {
-        return gulp
-            .src(styles.bundles[bundleName])
-            .pipe(sourcemaps.init())                    // Initialize the sourcemap
-            .pipe(sass().on('error', sass.logError))    // Compile sass to css
-            .pipe(postcss(processors))                  // Apply PostCSS processors to css
-            .pipe(rename(filename))                     // Rename the file with the 'min' prefix 
-            .pipe(sourcemaps.write('.'))                // Write the sourcemap file to the current directory
-            .pipe(gulp.dest(styles.dest));              // Output the compiled css
+    gulp.task(task.buildName, function() {
+        return pipeline(
+            gulp.src(task.files),
+            sourcemaps.init(),                          // Init the sourcemap
+            sass().on('error', sass.logError),          // Compile sass
+            postcss(processors),                        // Apply PostCSS processors
+            rename(filename),                           // Rename the file with the 'min' suffix 
+            sourcemaps.write('.'),                      // Write the sourcemap
+            gulp.dest(styles.dest)                      // Output the compiled css
+        );
     });
-});
+}
 
-gulp.task('styles',
-    gulp.parallel(
-        cssBundles.map(name => { return name; })
-    )
-);
+const styleWatchTask = function(task) {
+    gulp.task(task.watchName, function() {
+        return gulp.watch(task.files, gulp.series(task.buildName));
+    });
+}
 
+
+for (const [name, files] of Object.entries(styles.bundles)) {
+
+    const task = {
+        'buildName': 'build:css:' + name,
+        'watchName': 'watch:css:' + name,
+        'name': name,
+        'files': files
+    }
+
+    styleBuildTask(task);
+    styleWatchTask(task);
+
+    buildTasks.push(task.buildName);
+    watchTasks.push(task.watchName);
+};
+
+// --------------------------------------------------
 // Gulp: Compile JavaScript
 // --------------------------------------------------
 
-var jsBundles = Object.keys(scripts.bundles);
-
-jsBundles.forEach(function(bundleName) {
-    gulp.task(bundleName, function () {
-        return gulp
-            .src(scripts.bundles[bundleName])
-            .pipe(sourcemaps.init())                    // Initialize the sourcemap
-            .pipe(concat(bundleName + '.min.js'))       // Rename the file with the 'min' prefix 
-            .pipe(sourcemaps.write('.'))                // Write the sourcemap file to the current directory
-            .pipe(gulp.dest(scripts.dest));             // Output the compiled js
+const scriptBuildTask = function(task) {
+    gulp.task(task.buildName, function() {
+        return pipeline(
+            gulp.src(task.files),
+            sourcemaps.init(),                          // Init the sourcemap
+            concat(task.name + '.min.js'),              // Combine files (and rename)
+            babel({presets: ['@babel/env']}),           // Babel
+            terser(),                                   // Minify
+            sourcemaps.write('.'),                      // Write the sourcemap
+            gulp.dest(scripts.dest)                     // Output the compiled js    
+        );
     });
-});
+}
 
-gulp.task('js',
-    gulp.parallel(
-        jsBundles.map(name => { return name; })
-    )
+const scriptWatchTask = function(task) {
+    gulp.task(task.watchName, function() {
+        return gulp.watch(task.files, gulp.series(task.buildName));
+    });
+}
+
+for (const [name, files] of Object.entries(scripts.bundles)) {
+
+    const task = {
+        'buildName': 'build:js:' + name,
+        'watchName': 'watch:js:' + name,
+        'name': name,
+        'files': files
+    }
+
+    scriptBuildTask(task);
+    scriptWatchTask(task);
+
+    buildTasks.push(task.buildName);
+    watchTasks.push(task.watchName);
+};
+
+// --------------------------------------------------
+// Gulp: Default
+// --------------------------------------------------
+
+exports.default = gulp.series(
+    gulp.parallel(buildTasks),
+    gulp.parallel(watchTasks),
 );

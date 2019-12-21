@@ -1,3 +1,4 @@
+'use strict';
 
 const foo = () => {
     console.log('hello world!')
