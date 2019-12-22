@@ -9,9 +9,9 @@ const gulp = require('gulp');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const plumber = require('gulp-plumber');
-
-const { format } = require('string-kit');
-const { pipeline } = require('readable-stream');
+const del = require('del');
+const format = require('string-kit').format;
+const pipeline = require('readable-stream').pipeline;
 
 // CSS
 const sass = require('gulp-sass');
@@ -54,7 +54,7 @@ const watchTasks = [];
 const error = function(err) {
 	const message =
 		'\n' +
-		`^rError:^ ${err.plugin} ran into an error` +
+		`^rError:^ ${err.plugin} threw an error` +
 		'\n' +
 		`${err.messageOriginal}` +
 		'\n' +
@@ -65,7 +65,20 @@ const error = function(err) {
 };
 
 // --------------------------------------------------
-// Gulp: Compile Sass
+// Clean Destination Folders
+// --------------------------------------------------
+
+const clean = function (done) {
+    del.sync([
+        styles.dest, 
+        scripts.dest
+    ]);
+
+    done();
+};
+
+// --------------------------------------------------
+// Gulp: Compile Styles
 // --------------------------------------------------
 
 const cssBuildTask = function(task) {
@@ -109,6 +122,7 @@ const cssWatchTask = function(task) {
 	});
 };
 
+// Create tasks for each bundle in styles.bundles
 for (const [name, files] of Object.entries(styles.bundles)) {
 	const task = {
 		buildName: 'build:css:' + name,
@@ -125,7 +139,7 @@ for (const [name, files] of Object.entries(styles.bundles)) {
 }
 
 // --------------------------------------------------
-// Gulp: Compile JavaScript
+// Gulp: Compile Scripts
 // --------------------------------------------------
 
 const jsBuildTask = function(task) {
@@ -168,6 +182,7 @@ const jsWatchTask = function(task) {
 	});
 };
 
+// Create tasks for each bundle in scripts.bundles
 for (const [name, files] of Object.entries(scripts.bundles)) {
 	const task = {
 		buildName: 'build:js:' + name,
@@ -184,10 +199,23 @@ for (const [name, files] of Object.entries(scripts.bundles)) {
 }
 
 // --------------------------------------------------
-// Gulp: Default
+// Gulp: Exports
 // --------------------------------------------------
 
+exports.clean = gulp.series(
+	clean
+);
+
+exports.build = gulp.series(
+	gulp.parallel(buildTasks)
+);
+
+exports.watch = gulp.series(
+	gulp.parallel(watchTasks)
+);
+
 exports.default = gulp.series(
+    clean,
 	gulp.parallel(buildTasks),
 	gulp.parallel(watchTasks)
 );
