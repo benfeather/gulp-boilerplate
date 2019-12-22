@@ -8,6 +8,9 @@
 const gulp          = require('gulp');
 const rename        = require('gulp-rename');
 const sourcemaps    = require('gulp-sourcemaps');
+const plumber       = require('gulp-plumber');
+
+const { format }    = require('string-kit') ;
 const { pipeline }  = require('readable-stream');
 
 // CSS
@@ -45,57 +48,81 @@ const scripts = {
     }
 };
 
-// --------------------------------------------------
-// Vars
-// --------------------------------------------------
-
 const buildTasks = [];
 
 const watchTasks = [];
+
+// --------------------------------------------------
+// Error Handler
+// --------------------------------------------------
+
+const error = function(err) {
+    const message = '\n' +
+                    `^rError:^ ${err.plugin} ran into an error` +
+                    '\n' +
+                    `${err.messageOriginal}` +
+                    '\n' +
+                    `^rline ${err.line}^ in ^r${err.relativePath}^` +
+                    '\n';
+
+    console.log(format(message));
+};
 
 // --------------------------------------------------
 // Gulp: Compile Sass
 // --------------------------------------------------
 
 const cssBuildTask = function(task) {
-
-    const processors = [
-        autoprefixer,
-        cssnano
-    ];
-
-    const filename = {                              
-        basename: task.name,
-        suffix: '.min'
-    };
-
     gulp.task(task.buildName, function() {
         return pipeline(
+            // Get the source files
             gulp.src(task.files),
-            sourcemaps.init(),                          // Init the sourcemap
-            sass().on('error', sass.logError),          // Compile sass
-            postcss(processors),                        // Apply PostCSS processors
-            rename(filename),                           // Rename the file with the 'min' suffix 
-            sourcemaps.write('.'),                      // Write the sourcemap
-            gulp.dest(styles.dest)                      // Output the compiled css
+            
+            // Init the custom error handling
+            plumber({ 
+                'errorHandler': error 
+            }),
+
+            // Init the sourcemap
+            sourcemaps.init(),
+            
+            // Compile sass
+            sass(),
+            
+            // Apply the PostCSS processors
+            postcss([
+                autoprefixer,
+                cssnano
+            ]),
+            
+            // Rename the file with the 'min' suffix
+            rename({
+                basename: task.name, 
+                suffix: '.min' 
+            }),
+            
+            // Output the sourcemap
+            sourcemaps.write('.'),
+            
+            // Output the compiled css
+            gulp.dest(styles.dest)
         );
     });
-}
+};
 
 const cssWatchTask = function(task) {
     gulp.task(task.watchName, function() {
         return gulp.watch(task.files, gulp.series(task.buildName));
     });
-}
+};
 
 for (const [name, files] of Object.entries(styles.bundles)) {
-
     const task = {
         'buildName': 'build:css:' + name,
         'watchName': 'watch:css:' + name,
         'name': name,
         'files': files
-    }
+    };
 
     cssBuildTask(task);
     cssWatchTask(task);
@@ -111,31 +138,50 @@ for (const [name, files] of Object.entries(styles.bundles)) {
 const jsBuildTask = function(task) {
     gulp.task(task.buildName, function() {
         return pipeline(
+            // Get the source files
             gulp.src(task.files),
-            sourcemaps.init(),                          // Init the sourcemap
-            concat(task.name + '.min.js'),              // Combine files (and rename)
-            babel({presets: ['@babel/env']}),           // Babel
-            terser(),                                   // Minify
-            sourcemaps.write('.'),                      // Write the sourcemap
-            gulp.dest(scripts.dest)                     // Output the compiled js    
+            
+            // Init the custom error handling
+            plumber({ 
+                'errorHandler': error 
+            }),
+
+            // Init the sourcemap
+            sourcemaps.init(),
+            
+            // Combine the files and rename
+            concat(task.name + '.min.js'),
+
+            // Babel
+            babel({
+                presets: ['@babel/env']
+            }),
+            
+            // Minify
+            terser(),
+
+            // Write the sourcemap
+            sourcemaps.write('.'),
+            
+            // Output the compiled js
+            gulp.dest(scripts.dest)
         );
     });
-}
+};
 
 const jsWatchTask = function(task) {
     gulp.task(task.watchName, function() {
         return gulp.watch(task.files, gulp.series(task.buildName));
     });
-}
+};
 
 for (const [name, files] of Object.entries(scripts.bundles)) {
-
     const task = {
         'buildName': 'build:js:' + name,
         'watchName': 'watch:js:' + name,
         'name': name,
         'files': files
-    }
+    };
 
     jsBuildTask(task);
     jsWatchTask(task);
