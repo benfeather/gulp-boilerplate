@@ -24,6 +24,9 @@ const concat = require('gulp-concat');
 const babel = require('gulp-babel');
 const terser = require('gulp-terser');
 
+// Images
+const imagemin = require('gulp-imagemin');
+
 // --------------------------------------------------
 // Settings & Configuration
 // --------------------------------------------------
@@ -31,17 +34,27 @@ const terser = require('gulp-terser');
 const styles = {
 	dest: 'dist/css/',
 	bundles: {
-		styles: 'src/sass/**/*.{scss,sass}'
+		styles: 'assets/sass/**/*.{scss,sass}'
 	}
 };
 
 const scripts = {
 	dest: 'dist/js/',
 	bundles: {
-		main: ['src/js/script-1.js', 'src/js/script-2.js'],
-		vendor: ['src/js/script-3.js']
+		scripts: ['assets/js/script-1.js', 'assets/js/script-2.js'],
+		vendor: ['assets/js/script-3.js']
 	}
 };
+
+const images = {
+    src: 'assets/images/**/*.{png,jpg,gif,svg}',
+    dest: 'dist/images/'
+}
+
+const fonts = {
+    src: 'assets/fonts/**/*',
+    dest: 'dist/fonts/'
+}
 
 const buildTasks = [];
 
@@ -71,7 +84,9 @@ const error = function(err) {
 const clean = function (done) {
     del.sync([
         styles.dest, 
-        scripts.dest
+        scripts.dest,
+        images.dest,
+        fonts.dest
     ]);
 
     done();
@@ -99,7 +114,10 @@ const cssBuildTask = function(task) {
 			sass(),
 
 			// Apply the PostCSS processors
-			postcss([autoprefixer, cssnano]),
+			postcss([
+                autoprefixer, 
+                cssnano
+            ]),
 
 			// Rename the file with the 'min' suffix
 			rename({
@@ -197,6 +215,51 @@ for (const [name, files] of Object.entries(scripts.bundles)) {
 	buildTasks.push(task.buildName);
 	watchTasks.push(task.watchName);
 }
+
+// --------------------------------------------------
+// Gulp: Images
+// --------------------------------------------------
+
+gulp.task('build:images', function() {
+    return pipeline(
+        // Get the source files
+        gulp.src(images.src),
+
+        // Optimise PNG, JPEG, GIF and SVG images
+        imagemin(),
+
+        // Output
+        gulp.dest(images.dest)
+    );
+});
+
+gulp.task('watch:images', function() {
+    return gulp.watch(images.src, gulp.series('build:images'));
+});
+
+buildTasks.push('build:images');
+watchTasks.push('watch:images');
+
+// --------------------------------------------------
+// Gulp: Fonts
+// --------------------------------------------------
+
+gulp.task('build:fonts', function() {
+    return pipeline(
+        // Get the source files
+        gulp.src(fonts.src),
+
+        // Output
+        gulp.dest(fonts.dest)
+    );
+});
+
+gulp.task('watch:fonts', function() {
+    return gulp.watch(fonts.src, gulp.series('build:fonts'));
+});
+
+buildTasks.push('build:fonts');
+watchTasks.push('watch:fonts');
 
 // --------------------------------------------------
 // Gulp: Exports

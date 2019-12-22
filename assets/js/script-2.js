@@ -1,7 +1,7 @@
 'use strict';
 
 const bar = () => {
-    console.log('goodbye world!')
+    console.log('My custom script #2');
 }
 
 bar();

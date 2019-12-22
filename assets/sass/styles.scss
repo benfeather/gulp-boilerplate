@@ -1,0 +1,72 @@
+@font-face {
+    font-family: 'OpenSans';
+    font-weight: 700;
+    src: url('../fonts/OpenSans-Bold.ttf')  format('truetype');
+}
+
+@font-face {
+    font-family: 'OpenSans';
+    font-weight: 400;
+    src: url('../fonts/OpenSans-Regular.ttf')  format('truetype');
+}
+
+@font-face {
+    font-family: 'OpenSans';
+    font-weight: 300;
+    src: url('../fonts/OpenSans-Light.ttf')  format('truetype');
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+html,
+body {
+    min-height: 100vh;
+}
+
+html {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    line-height: 1.6;
+    font-family: 'OpenSans', sans-serif;
+    font-weight: 400;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:'header' 'main' 'footer';
+}
+
+header {
+    grid-area: header;
+    background-color: lightgray;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    text-align: center;
+}
+
+main {
+    grid-area: main;
+}
+
+footer {
+    grid-area: footer;
+    background-color: lightgray;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    text-align: center;
+}
+
+.container {
+    display: block;
+    max-width: 1240px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
