@@ -9,7 +9,7 @@ const gulp = require('gulp');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const plumber = require('gulp-plumber');
-const gulpif  = require('gulp-if');
+const gulpif = require('gulp-if');
 const del = require('del');
 const format = require('string-kit').format;
 const pipeline = require('readable-stream').pipeline;
@@ -52,21 +52,21 @@ const scripts = {
 		scripts: ['assets/js/script-1.js', 'assets/js/script-2.js'],
 		vendor: ['assets/js/script-3.js']
 	},
-	dest: 'dist/js/',
+	dest: 'dist/js/'
 };
 
 const images = {
 	enabled: true,
 	clean: true,
-    src: 'assets/images/**/*.{png,jpg,gif,svg}',
-    dest: 'dist/images/'
+	src: 'assets/images/**/*.{png,jpg,gif,svg}',
+	dest: 'dist/images/'
 };
 
 const fonts = {
 	enabled: true,
 	clean: true,
-    src: 'assets/fonts/**/*',
-    dest: 'dist/fonts/'
+	src: 'assets/fonts/**/*',
+	dest: 'dist/fonts/'
 };
 
 const buildTasks = [];
@@ -94,7 +94,7 @@ const error = function(err) {
 // Clean Destination Folders
 // --------------------------------------------------
 
-const clean = function (done) {
+const clean = function(done) {
 	const toDelete = [];
 
 	if (styles.enabled && styles.clean) toDelete.push(styles.dest);
@@ -105,23 +105,19 @@ const clean = function (done) {
 
 	if (fonts.enabled && fonts.clean) toDelete.push(fonts.dest);
 
-    del.sync(toDelete);
+	del.sync(toDelete);
 
-    done();
+	done();
 };
 
 // --------------------------------------------------
 // Gulp: Compile Styles
 // --------------------------------------------------
 
-if (styles.enabled) { 
-
+if (styles.enabled) {
 	// Create a new build task
 	const cssBuildTask = function(task) {
-
-		const processors = [
-			autoprefixer
-		]
+		const processors = [autoprefixer];
 
 		if (styles.minify) processors.push(cssnano);
 
@@ -186,8 +182,7 @@ if (styles.enabled) {
 // Gulp: Compile Scripts
 // --------------------------------------------------
 
-if (scripts.enabled) { 
-
+if (scripts.enabled) {
 	// Create a new build task
 	const jsBuildTask = function(task) {
 		gulp.task(task.buildName, function() {
@@ -252,7 +247,6 @@ if (scripts.enabled) {
 // --------------------------------------------------
 
 if (images.enabled) {
-
 	// Create a new build task
 	gulp.task('build:images', function() {
 		return pipeline(
@@ -282,7 +276,6 @@ if (images.enabled) {
 // --------------------------------------------------
 
 if (fonts.enabled) {
-
 	// Create a new build task
 	gulp.task('build:fonts', function() {
 		return pipeline(
@@ -319,7 +312,7 @@ exports.build = gulp.series(buildTasks);
 exports.watch = gulp.parallel(watchTasks);
 
 exports.default = gulp.series(
-    exports.clean,
-	exports.build,
+	exports.clean, 
+	exports.build, 
 	exports.watch
 );
