@@ -1,7 +1,7 @@
 'use strict';
 
 // --------------------------------------------------
-// Require
+// Global
 // --------------------------------------------------
 
 // General
@@ -28,50 +28,70 @@ const terser = require('gulp-terser');
 // Images
 const imagemin = require('gulp-imagemin');
 
+// Task lists
+const buildTasks = [];
+const watchTasks = [];
+
 // --------------------------------------------------
-// Settings & Configuration
+// Settings
 // --------------------------------------------------
 
+// Config: Styles
 const styles = {
 	enabled: true,
 	clean: true,
 	minify: true,
+	prefix: true,
 	sourcemaps: true,
-	src: {
-		styles: 'assets/sass/**/*.{scss,sass}'
-	},
-	dest: 'dist/css/'
+	bundles: [
+		{
+			name: 'styles',
+			input: './assets/sass/**/*.{scss,sass}',
+			output: './dist/css/'
+		}
+	]
 };
 
+// Config: Scripts
 const scripts = {
 	enabled: true,
 	clean: true,
 	minify: true,
 	sourcemaps: true,
-	src: {
-		scripts: ['assets/js/script-1.js', 'assets/js/script-2.js'],
-		vendor: ['assets/js/script-3.js']
-	},
-	dest: 'dist/js/'
+	bundles: [
+		{
+			name: 'main',
+			input: ['./assets/js/script-1.js', './assets/js/script-2.js'],
+			output: './dist/js/'
+		},
+		{
+			name: 'vendor',
+			input: './assets/js/script-3.js',
+			output: './dist/js/'
+		}
+	]
 };
 
+// Config: Images
 const images = {
 	enabled: true,
 	clean: true,
-	src: 'assets/images/**/*.{png,jpg,gif,svg}',
-	dest: 'dist/images/'
+	input: './assets/images/**/*.{png,jpg,jpeg,gif,svg}',
+	output: './dist/images/'
 };
 
-const fonts = {
+// Config: Copy
+const copy = {
 	enabled: true,
 	clean: true,
-	src: 'assets/fonts/**/*',
-	dest: 'dist/fonts/'
+	bundles: [
+		{
+			name: 'fonts',
+			input: './assets/fonts/**/*.{eot,woff2,woff,ttf,svg}',
+			output: './dist/fonts/'
+		}
+	]
 };
-
-const buildTasks = [];
-
-const watchTasks = [];
 
 // --------------------------------------------------
 // Error Handler
@@ -97,34 +117,43 @@ const error = function(err) {
 const clean = function(done) {
 	const toDelete = [];
 
-	if (styles.enabled && styles.clean) toDelete.push(styles.dest);
+	// Add output path from style.bundles
+	if (styles.enabled && styles.clean)
+		styles.bundles.forEach(bundle => toDelete.push(bundle.output));
 
-	if (scripts.enabled && scripts.clean) toDelete.push(scripts.dest);
+	// Add output path from script.bundles
+	if (scripts.enabled && scripts.clean)
+		scripts.bundles.forEach(bundle => toDelete.push(bundle.output));
 
-	if (images.enabled && images.clean) toDelete.push(images.dest);
+	// Add output path from images
+	if (images.enabled && images.clean) toDelete.push(images.output);
 
-	if (fonts.enabled && fonts.clean) toDelete.push(fonts.dest);
+	// Add output path from copy.bundles
+	if (copy.enabled && copy.clean)
+		copy.bundles.forEach(bundle => toDelete.push(bundle.output));
 
-	del.sync(toDelete);
+	// Clean paths (unique paths only)
+	del.sync([...new Set(toDelete)]);
 
 	done();
 };
 
 // --------------------------------------------------
-// Gulp: Compile Styles
+// Compile Styles
 // --------------------------------------------------
 
 if (styles.enabled) {
 	// Create a new build task
-	const cssBuildTask = function(task) {
-		const processors = [autoprefixer];
+	const cssBuildTask = function(bundle) {
+		const processors = [];
 
+		if (styles.prefix) processors.push(autoprefixer);
 		if (styles.minify) processors.push(cssnano);
 
-		gulp.task(task.buildName, function() {
+		gulp.task(bundle.buildName, function() {
 			return pipeline(
-				// Get the source files
-				gulp.src(task.files),
+				// Get the input files
+				gulp.src(bundle.input),
 
 				// Init the custom error handling
 				plumber({
@@ -142,53 +171,49 @@ if (styles.enabled) {
 
 				// Rename the output file
 				rename({
-					basename: task.name
+					basename: bundle.name
 				}),
 
 				// Output the sourcemap
 				gulpif(styles.sourcemaps, sourcemaps.write('.')),
 
 				// Output the compiled css
-				gulp.dest(styles.dest)
+				gulp.dest(bundle.output)
 			);
 		});
 	};
 
 	// Create a new watch task
-	const cssWatchTask = function(task) {
-		gulp.task(task.watchName, function() {
-			return gulp.watch(task.files, gulp.series(task.buildName));
+	const cssWatchTask = function(bundle) {
+		gulp.task(bundle.watchName, function() {
+			return gulp.watch(bundle.input, gulp.series(bundle.buildName));
 		});
 	};
 
-	// Create tasks for each bundle in styles.src
-	for (const [name, files] of Object.entries(styles.src)) {
-		const task = {
-			buildName: 'build:css:' + name,
-			watchName: 'watch:css:' + name,
-			name: name,
-			files: files
-		};
+	// Create tasks for each bundle in styles
+	styles.bundles.forEach(bundle => {
+		bundle.buildName = 'build:css:' + bundle.name;
+		bundle.watchName = 'watch:css:' + bundle.name;
 
-		cssBuildTask(task);
-		cssWatchTask(task);
+		cssBuildTask(bundle);
+		cssWatchTask(bundle);
 
-		buildTasks.push(task.buildName);
-		watchTasks.push(task.watchName);
-	}
+		buildTasks.push(bundle.buildName);
+		watchTasks.push(bundle.watchName);
+	});
 }
 
 // --------------------------------------------------
-// Gulp: Compile Scripts
+// Compile Scripts
 // --------------------------------------------------
 
 if (scripts.enabled) {
 	// Create a new build task
-	const jsBuildTask = function(task) {
-		gulp.task(task.buildName, function() {
+	const jsBuildTask = function(bundle) {
+		gulp.task(bundle.buildName, function() {
 			return pipeline(
 				// Get the source files
-				gulp.src(task.files),
+				gulp.src(bundle.input),
 
 				// Init the custom error handling
 				plumber({
@@ -199,7 +224,7 @@ if (scripts.enabled) {
 				gulpif(scripts.sourcemaps, sourcemaps.init()),
 
 				// Combine the files and rename
-				concat(task.name + '.js'),
+				concat(bundle.name + '.js'),
 
 				// Babel
 				babel({
@@ -213,37 +238,33 @@ if (scripts.enabled) {
 				gulpif(scripts.sourcemaps, sourcemaps.write('.')),
 
 				// Output the compiled js
-				gulp.dest(scripts.dest)
+				gulp.dest(bundle.output)
 			);
 		});
 	};
 
 	// Create a new watch task
-	const jsWatchTask = function(task) {
-		gulp.task(task.watchName, function() {
-			return gulp.watch(task.files, gulp.series(task.buildName));
+	const jsWatchTask = function(bundle) {
+		gulp.task(bundle.watchName, function() {
+			return gulp.watch(bundle.input, gulp.series(bundle.buildName));
 		});
 	};
 
-	// Create tasks for each bundle in scripts.src
-	for (const [name, files] of Object.entries(scripts.src)) {
-		const task = {
-			buildName: 'build:js:' + name,
-			watchName: 'watch:js:' + name,
-			name: name,
-			files: files
-		};
+	// Create tasks for each bundle in scripts
+	scripts.bundles.forEach(bundle => {
+		bundle.buildName = 'build:js:' + bundle.name;
+		bundle.watchName = 'watch:js:' + bundle.name;
 
-		jsBuildTask(task);
-		jsWatchTask(task);
+		jsBuildTask(bundle);
+		jsWatchTask(bundle);
 
-		buildTasks.push(task.buildName);
-		watchTasks.push(task.watchName);
-	}
+		buildTasks.push(bundle.buildName);
+		watchTasks.push(bundle.watchName);
+	});
 }
 
 // --------------------------------------------------
-// Gulp: Images
+// Images
 // --------------------------------------------------
 
 if (images.enabled) {
@@ -251,19 +272,19 @@ if (images.enabled) {
 	gulp.task('build:images', function() {
 		return pipeline(
 			// Get the source files
-			gulp.src(images.src),
+			gulp.src(images.input),
 
 			// Optimise PNG, JPEG, GIF and SVG images
 			imagemin(),
 
-			// Output
-			gulp.dest(images.dest)
+			// Output the images
+			gulp.dest(images.output)
 		);
 	});
 
 	// Create a new watch task
 	gulp.task('watch:images', function() {
-		return gulp.watch(images.src, gulp.series('build:images'));
+		return gulp.watch(images.input, gulp.series('build:images'));
 	});
 
 	// Add tasks to task lists
@@ -272,33 +293,45 @@ if (images.enabled) {
 }
 
 // --------------------------------------------------
-// Gulp: Fonts
+// Copy
 // --------------------------------------------------
 
-if (fonts.enabled) {
+if (copy.enabled) {
 	// Create a new build task
-	gulp.task('build:fonts', function() {
-		return pipeline(
-			// Get the source files
-			gulp.src(fonts.src),
+	const copyBuildTask = function(bundle) {
+		gulp.task(bundle.buildName, function() {
+			return pipeline(
+				// Get the source files
+				gulp.src(bundle.input),
 
-			// Output
-			gulp.dest(fonts.dest)
-		);
-	});
+				// Output the files
+				gulp.dest(bundle.output)
+			);
+		});
+	};
 
 	// Create a new watch task
-	gulp.task('watch:fonts', function() {
-		return gulp.watch(fonts.src, gulp.series('build:fonts'));
-	});
+	const copyWatchTask = function(bundle) {
+		gulp.task(bundle.watchName, function() {
+			return gulp.watch(bundle.input, gulp.series(bundle.buildName));
+		});
+	};
 
-	// Add tasks to task lists
-	buildTasks.push('build:fonts');
-	watchTasks.push('watch:fonts');
+	// Create tasks for each bundle in copy.src
+	copy.bundles.forEach(bundle => {
+		bundle.buildName = 'build:copy:' + bundle.name;
+		bundle.watchName = 'watch:copy:' + bundle.name;
+
+		copyBuildTask(bundle);
+		copyWatchTask(bundle);
+
+		buildTasks.push(bundle.buildName);
+		watchTasks.push(bundle.watchName);
+	});
 }
 
 // --------------------------------------------------
-// Gulp: Exports
+// Exports
 // --------------------------------------------------
 
 // Prevent an error if all of the features are disabled
