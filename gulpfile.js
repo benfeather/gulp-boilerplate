@@ -9,6 +9,7 @@ const gulp = require('gulp');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const plumber = require('gulp-plumber');
+const gulpif  = require('gulp-if');
 const del = require('del');
 const format = require('string-kit').format;
 const pipeline = require('readable-stream').pipeline;
@@ -32,29 +33,41 @@ const imagemin = require('gulp-imagemin');
 // --------------------------------------------------
 
 const styles = {
-	dest: 'dist/css/',
-	bundles: {
+	enabled: true,
+	clean: true,
+	minify: true,
+	sourcemaps: true,
+	src: {
 		styles: 'assets/sass/**/*.{scss,sass}'
-	}
+	},
+	dest: 'dist/css/'
 };
 
 const scripts = {
-	dest: 'dist/js/',
-	bundles: {
+	enabled: true,
+	clean: true,
+	minify: true,
+	sourcemaps: true,
+	src: {
 		scripts: ['assets/js/script-1.js', 'assets/js/script-2.js'],
 		vendor: ['assets/js/script-3.js']
-	}
+	},
+	dest: 'dist/js/',
 };
 
 const images = {
+	enabled: true,
+	clean: true,
     src: 'assets/images/**/*.{png,jpg,gif,svg}',
     dest: 'dist/images/'
-}
+};
 
 const fonts = {
+	enabled: true,
+	clean: true,
     src: 'assets/fonts/**/*',
     dest: 'dist/fonts/'
-}
+};
 
 const buildTasks = [];
 
@@ -82,12 +95,17 @@ const error = function(err) {
 // --------------------------------------------------
 
 const clean = function (done) {
-    del.sync([
-        styles.dest, 
-        scripts.dest,
-        images.dest,
-        fonts.dest
-    ]);
+	const toDelete = [];
+
+	if (styles.enabled && styles.clean) toDelete.push(styles.dest);
+
+	if (scripts.enabled && scripts.clean) toDelete.push(scripts.dest);
+
+	if (images.enabled && images.clean) toDelete.push(images.dest);
+
+	if (fonts.enabled && fonts.clean) toDelete.push(fonts.dest);
+
+    del.sync(toDelete);
 
     done();
 };
@@ -96,189 +114,212 @@ const clean = function (done) {
 // Gulp: Compile Styles
 // --------------------------------------------------
 
-const cssBuildTask = function(task) {
-	gulp.task(task.buildName, function() {
-		return pipeline(
-			// Get the source files
-			gulp.src(task.files),
+if (styles.enabled) { 
 
-			// Init the custom error handling
-			plumber({
-				errorHandler: error
-			}),
+	// Create a new build task
+	const cssBuildTask = function(task) {
 
-			// Init the sourcemap
-			sourcemaps.init(),
+		const processors = [
+			autoprefixer
+		]
 
-			// Compile sass
-			sass(),
+		if (styles.minify) processors.push(cssnano);
 
-			// Apply the PostCSS processors
-			postcss([
-                autoprefixer, 
-                cssnano
-            ]),
+		gulp.task(task.buildName, function() {
+			return pipeline(
+				// Get the source files
+				gulp.src(task.files),
 
-			// Rename the file with the 'min' suffix
-			rename({
-				basename: task.name,
-				suffix: '.min'
-			}),
+				// Init the custom error handling
+				plumber({
+					errorHandler: error
+				}),
 
-			// Output the sourcemap
-			sourcemaps.write('.'),
+				// Init the sourcemap
+				gulpif(styles.sourcemaps, sourcemaps.init()),
 
-			// Output the compiled css
-			gulp.dest(styles.dest)
-		);
-	});
-};
+				// Compile sass
+				sass(),
 
-const cssWatchTask = function(task) {
-	gulp.task(task.watchName, function() {
-		return gulp.watch(task.files, gulp.series(task.buildName));
-	});
-};
+				// Apply the PostCSS processors
+				postcss(processors),
 
-// Create tasks for each bundle in styles.bundles
-for (const [name, files] of Object.entries(styles.bundles)) {
-	const task = {
-		buildName: 'build:css:' + name,
-		watchName: 'watch:css:' + name,
-		name: name,
-		files: files
+				// Rename the output file
+				rename({
+					basename: task.name
+				}),
+
+				// Output the sourcemap
+				gulpif(styles.sourcemaps, sourcemaps.write('.')),
+
+				// Output the compiled css
+				gulp.dest(styles.dest)
+			);
+		});
 	};
 
-	cssBuildTask(task);
-	cssWatchTask(task);
+	// Create a new watch task
+	const cssWatchTask = function(task) {
+		gulp.task(task.watchName, function() {
+			return gulp.watch(task.files, gulp.series(task.buildName));
+		});
+	};
 
-	buildTasks.push(task.buildName);
-	watchTasks.push(task.watchName);
+	// Create tasks for each bundle in styles.src
+	for (const [name, files] of Object.entries(styles.src)) {
+		const task = {
+			buildName: 'build:css:' + name,
+			watchName: 'watch:css:' + name,
+			name: name,
+			files: files
+		};
+
+		cssBuildTask(task);
+		cssWatchTask(task);
+
+		buildTasks.push(task.buildName);
+		watchTasks.push(task.watchName);
+	}
 }
 
 // --------------------------------------------------
 // Gulp: Compile Scripts
 // --------------------------------------------------
 
-const jsBuildTask = function(task) {
-	gulp.task(task.buildName, function() {
-		return pipeline(
-			// Get the source files
-			gulp.src(task.files),
+if (scripts.enabled) { 
 
-			// Init the custom error handling
-			plumber({
-				errorHandler: error
-			}),
+	// Create a new build task
+	const jsBuildTask = function(task) {
+		gulp.task(task.buildName, function() {
+			return pipeline(
+				// Get the source files
+				gulp.src(task.files),
 
-			// Init the sourcemap
-			sourcemaps.init(),
+				// Init the custom error handling
+				plumber({
+					errorHandler: error
+				}),
 
-			// Combine the files and rename
-			concat(task.name + '.min.js'),
+				// Init the sourcemap
+				gulpif(scripts.sourcemaps, sourcemaps.init()),
 
-			// Babel
-			babel({
-				presets: ['@babel/env']
-			}),
+				// Combine the files and rename
+				concat(task.name + '.js'),
 
-			// Minify
-			terser(),
+				// Babel
+				babel({
+					presets: ['@babel/env']
+				}),
 
-			// Write the sourcemap
-			sourcemaps.write('.'),
+				// Minify
+				gulpif(scripts.minify, terser()),
 
-			// Output the compiled js
-			gulp.dest(scripts.dest)
-		);
-	});
-};
+				// Write the sourcemap
+				gulpif(scripts.sourcemaps, sourcemaps.write('.')),
 
-const jsWatchTask = function(task) {
-	gulp.task(task.watchName, function() {
-		return gulp.watch(task.files, gulp.series(task.buildName));
-	});
-};
-
-// Create tasks for each bundle in scripts.bundles
-for (const [name, files] of Object.entries(scripts.bundles)) {
-	const task = {
-		buildName: 'build:js:' + name,
-		watchName: 'watch:js:' + name,
-		name: name,
-		files: files
+				// Output the compiled js
+				gulp.dest(scripts.dest)
+			);
+		});
 	};
 
-	jsBuildTask(task);
-	jsWatchTask(task);
+	// Create a new watch task
+	const jsWatchTask = function(task) {
+		gulp.task(task.watchName, function() {
+			return gulp.watch(task.files, gulp.series(task.buildName));
+		});
+	};
 
-	buildTasks.push(task.buildName);
-	watchTasks.push(task.watchName);
+	// Create tasks for each bundle in scripts.src
+	for (const [name, files] of Object.entries(scripts.src)) {
+		const task = {
+			buildName: 'build:js:' + name,
+			watchName: 'watch:js:' + name,
+			name: name,
+			files: files
+		};
+
+		jsBuildTask(task);
+		jsWatchTask(task);
+
+		buildTasks.push(task.buildName);
+		watchTasks.push(task.watchName);
+	}
 }
 
 // --------------------------------------------------
 // Gulp: Images
 // --------------------------------------------------
 
-gulp.task('build:images', function() {
-    return pipeline(
-        // Get the source files
-        gulp.src(images.src),
+if (images.enabled) {
 
-        // Optimise PNG, JPEG, GIF and SVG images
-        imagemin(),
+	// Create a new build task
+	gulp.task('build:images', function() {
+		return pipeline(
+			// Get the source files
+			gulp.src(images.src),
 
-        // Output
-        gulp.dest(images.dest)
-    );
-});
+			// Optimise PNG, JPEG, GIF and SVG images
+			imagemin(),
 
-gulp.task('watch:images', function() {
-    return gulp.watch(images.src, gulp.series('build:images'));
-});
+			// Output
+			gulp.dest(images.dest)
+		);
+	});
 
-buildTasks.push('build:images');
-watchTasks.push('watch:images');
+	// Create a new watch task
+	gulp.task('watch:images', function() {
+		return gulp.watch(images.src, gulp.series('build:images'));
+	});
+
+	// Add tasks to task lists
+	buildTasks.push('build:images');
+	watchTasks.push('watch:images');
+}
 
 // --------------------------------------------------
 // Gulp: Fonts
 // --------------------------------------------------
 
-gulp.task('build:fonts', function() {
-    return pipeline(
-        // Get the source files
-        gulp.src(fonts.src),
+if (fonts.enabled) {
 
-        // Output
-        gulp.dest(fonts.dest)
-    );
-});
+	// Create a new build task
+	gulp.task('build:fonts', function() {
+		return pipeline(
+			// Get the source files
+			gulp.src(fonts.src),
 
-gulp.task('watch:fonts', function() {
-    return gulp.watch(fonts.src, gulp.series('build:fonts'));
-});
+			// Output
+			gulp.dest(fonts.dest)
+		);
+	});
 
-buildTasks.push('build:fonts');
-watchTasks.push('watch:fonts');
+	// Create a new watch task
+	gulp.task('watch:fonts', function() {
+		return gulp.watch(fonts.src, gulp.series('build:fonts'));
+	});
+
+	// Add tasks to task lists
+	buildTasks.push('build:fonts');
+	watchTasks.push('watch:fonts');
+}
 
 // --------------------------------------------------
 // Gulp: Exports
 // --------------------------------------------------
 
-exports.clean = gulp.series(
-	clean
-);
+// Prevent an error if all of the features are disabled
+if (!buildTasks.length) buildTasks.push(done => done());
+if (!watchTasks.length) watchTasks.push(done => done());
 
-exports.build = gulp.series(
-	gulp.parallel(buildTasks)
-);
+exports.clean = gulp.series(clean);
 
-exports.watch = gulp.series(
-	gulp.parallel(watchTasks)
-);
+exports.build = gulp.series(buildTasks);
+
+exports.watch = gulp.parallel(watchTasks);
 
 exports.default = gulp.series(
-    clean,
-	gulp.parallel(buildTasks),
-	gulp.parallel(watchTasks)
+    exports.clean,
+	exports.build,
+	exports.watch
 );
