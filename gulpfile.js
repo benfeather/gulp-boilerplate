@@ -45,7 +45,7 @@ const styles = {
 	sourcemaps: true,
 	bundles: [
 		{
-			name: 'styles',
+			name: 'main',
 			input: './assets/sass/**/*.{scss,sass}',
 			output: './dist/css/'
 		}
@@ -144,7 +144,7 @@ const clean = function(done) {
 
 if (styles.enabled) {
 	// Create a new build task
-	const cssBuildTask = function(bundle) {
+	const stylesBuild = function(bundle) {
 		const processors = [];
 
 		if (styles.prefix) processors.push(autoprefixer);
@@ -184,23 +184,35 @@ if (styles.enabled) {
 	};
 
 	// Create a new watch task
-	const cssWatchTask = function(bundle) {
+	const stylesWatch = function(bundle) {
 		gulp.task(bundle.watchName, function() {
 			return gulp.watch(bundle.input, gulp.series(bundle.buildName));
 		});
 	};
+
+	// Init task arrays
+	styles.buildTasks = [];
+	styles.watchTasks = [];
 
 	// Create tasks for each bundle in styles
 	styles.bundles.forEach(bundle => {
 		bundle.buildName = 'build:css:' + bundle.name;
 		bundle.watchName = 'watch:css:' + bundle.name;
 
-		cssBuildTask(bundle);
-		cssWatchTask(bundle);
+		stylesBuild(bundle);
+		stylesWatch(bundle);
 
-		buildTasks.push(bundle.buildName);
-		watchTasks.push(bundle.watchName);
+		styles.buildTasks.push(bundle.buildName);
+		styles.watchTasks.push(bundle.watchName);
 	});
+
+	// Create tasks to run bundle tasks 
+	gulp.task('build:css', gulp.series(styles.buildTasks));
+	gulp.task('watch:css', gulp.parallel(styles.watchTasks));
+
+	// Add bundle tasks to global list
+	buildTasks.push('build:css');
+	watchTasks.push('watch:css');
 }
 
 // --------------------------------------------------
@@ -209,7 +221,7 @@ if (styles.enabled) {
 
 if (scripts.enabled) {
 	// Create a new build task
-	const jsBuildTask = function(bundle) {
+	const scriptBuild = function(bundle) {
 		gulp.task(bundle.buildName, function() {
 			return pipeline(
 				// Get the source files
@@ -244,23 +256,35 @@ if (scripts.enabled) {
 	};
 
 	// Create a new watch task
-	const jsWatchTask = function(bundle) {
+	const scriptWatch = function(bundle) {
 		gulp.task(bundle.watchName, function() {
 			return gulp.watch(bundle.input, gulp.series(bundle.buildName));
 		});
 	};
+
+	// Init task arrays
+	scripts.buildTasks = [];
+	scripts.watchTasks = [];
 
 	// Create tasks for each bundle in scripts
 	scripts.bundles.forEach(bundle => {
 		bundle.buildName = 'build:js:' + bundle.name;
 		bundle.watchName = 'watch:js:' + bundle.name;
 
-		jsBuildTask(bundle);
-		jsWatchTask(bundle);
+		scriptBuild(bundle);
+		scriptWatch(bundle);
 
-		buildTasks.push(bundle.buildName);
-		watchTasks.push(bundle.watchName);
+		scripts.buildTasks.push(bundle.buildName);
+		scripts.watchTasks.push(bundle.watchName);
 	});
+
+	// Create tasks to run bundle tasks 
+	gulp.task('build:js', gulp.series(scripts.buildTasks));
+	gulp.task('watch:js', gulp.parallel(scripts.watchTasks));
+
+	// Add bundle tasks to global list
+	buildTasks.push('build:js');
+	watchTasks.push('watch:js');
 }
 
 // --------------------------------------------------
@@ -269,12 +293,12 @@ if (scripts.enabled) {
 
 if (images.enabled) {
 	// Create a new build task
-	gulp.task('build:images', function() {
+	gulp.task('build:img', function() {
 		return pipeline(
 			// Get the source files
 			gulp.src(images.input),
 
-			// Optimise PNG, JPEG, GIF and SVG images
+			// Optimise PNG, JPG, GIF and SVG images
 			imagemin(),
 
 			// Output the images
@@ -283,13 +307,13 @@ if (images.enabled) {
 	});
 
 	// Create a new watch task
-	gulp.task('watch:images', function() {
-		return gulp.watch(images.input, gulp.series('build:images'));
+	gulp.task('watch:img', function() {
+		return gulp.watch(images.input, gulp.series('build:img'));
 	});
 
-	// Add tasks to task lists
-	buildTasks.push('build:images');
-	watchTasks.push('watch:images');
+	// Add tasks to global list
+	buildTasks.push('build:img');
+	watchTasks.push('watch:img');
 }
 
 // --------------------------------------------------
@@ -298,7 +322,7 @@ if (images.enabled) {
 
 if (copy.enabled) {
 	// Create a new build task
-	const copyBuildTask = function(bundle) {
+	const copyBuild = function(bundle) {
 		gulp.task(bundle.buildName, function() {
 			return pipeline(
 				// Get the source files
@@ -311,23 +335,35 @@ if (copy.enabled) {
 	};
 
 	// Create a new watch task
-	const copyWatchTask = function(bundle) {
+	const copyWatch = function(bundle) {
 		gulp.task(bundle.watchName, function() {
 			return gulp.watch(bundle.input, gulp.series(bundle.buildName));
 		});
 	};
 
-	// Create tasks for each bundle in copy.src
+	// Init task arrays
+	copy.buildTasks = [];
+	copy.watchTasks = [];
+
+	// Create tasks for each bundle
 	copy.bundles.forEach(bundle => {
 		bundle.buildName = 'build:copy:' + bundle.name;
 		bundle.watchName = 'watch:copy:' + bundle.name;
 
-		copyBuildTask(bundle);
-		copyWatchTask(bundle);
+		copyBuild(bundle);
+		copyWatch(bundle);
 
-		buildTasks.push(bundle.buildName);
-		watchTasks.push(bundle.watchName);
+		copy.buildTasks.push(bundle.buildName);
+		copy.watchTasks.push(bundle.watchName);
 	});
+
+	// Create tasks to run bundle tasks 
+	gulp.task('build:copy', gulp.series(copy.buildTasks));
+	gulp.task('watch:copy', gulp.parallel(copy.watchTasks));
+
+	// Add bundle tasks to global list
+	buildTasks.push('build:copy');
+	watchTasks.push('watch:copy');
 }
 
 // --------------------------------------------------
