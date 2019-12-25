@@ -42,8 +42,8 @@ const tasks = {};
 const styles = {
 	enabled: true,
 	clean: true,
-	minify: false,
-	prefix: false,
+	minify: true,
+	prefix: true,
 	sourcemaps: true,
 	bundles: [
 		{
@@ -110,7 +110,7 @@ const server = {
 // --------------------------------------------------
 
 // Custom error handler
-const error = function(err) {
+const error = (err) => {
 	const message =
 		'\n' +
 		`^rError:^ ${err.plugin} threw an error` +
@@ -136,7 +136,7 @@ const getNamedFunc = (name, func) => {
 };
 
 // Get tasks by name as []
-const getTasksByName = name => {
+const getTasksByName = (name) => {
 	const taskList = [];
 
 	Object.keys(tasks).forEach(task => {
@@ -150,12 +150,12 @@ const getTasksByName = name => {
 };
 
 // Get tasks by name as gulp.series
-const getSeries = name => {
+const getSeries = (name) => {
 	return gulp.series(getTasksByName(name));
 };
 
 // Get tasks by name as gulp.parallel
-const getParallel = name => {
+const getParallel = (name) => {
 	return gulp.parallel(getTasksByName(name));
 };
 
