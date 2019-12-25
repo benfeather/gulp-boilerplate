@@ -210,7 +210,7 @@ if (styles.enabled) {
 	if (styles.prefix) processors.push(autoprefixer);
 	if (styles.minify) processors.push(cssnano);
 
-	// Create tasks for each bundle in scripts
+	// Create tasks for each bundle in styles
 	styles.bundles.forEach(bundle => {
 		const buildName = `build:css:${bundle.name}`;
 		const watchName = `watch:css:${bundle.name}`;
@@ -341,7 +341,7 @@ if (images.enabled) {
 // --------------------------------------------------
 
 if (copy.enabled) {
-	// Create tasks for each bundle in scripts
+	// Create tasks for each bundle in copy
 	copy.bundles.forEach(bundle => {
 		const buildName = `build:copy:${bundle.name}`;
 		const watchName = `watch:copy:${bundle.name}`;
