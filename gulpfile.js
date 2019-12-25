@@ -95,9 +95,9 @@ const copy = {
 	]
 };
 
-// Config: Reload
+// Config: Server and LiveReload
 const server = {
-	enabled: false,
+	enabled: true,
 	watch: './index.html',
 	config: {
 		server: '.'
