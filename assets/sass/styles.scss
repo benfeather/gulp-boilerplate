@@ -45,9 +45,14 @@ body {
 header {
     grid-area: header;
     background-color: lightgray;
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding-top: 20px;
+    padding-bottom: 20px;
     text-align: center;
+
+    @media (min-width: 1200px) {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
 }
 
 main {
@@ -57,16 +62,25 @@ main {
 footer {
     grid-area: footer;
     background-color: lightgray;
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding-top: 20px;
+    padding-bottom: 20px;
     text-align: center;
+
+    @media (min-width: 1200px) {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
 }
 
 .container {
     display: block;
-    max-width: 1240px;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
     padding-left: 20px;
     padding-right: 20px;
+
+    @media (min-width: 1200px) {
+        max-width: 1240px;
+    }
 }

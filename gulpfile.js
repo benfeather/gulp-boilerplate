@@ -19,6 +19,7 @@ const sass = require('gulp-sass');
 const postcss = require('gulp-postcss');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
+const combinemq = require('postcss-combine-media-query');
 
 // JS
 const concat = require('gulp-concat');
@@ -205,7 +206,9 @@ const serve = (done) => {
 // --------------------------------------------------
 
 if (styles.enabled) {
-	const processors = [];
+	const processors = [
+		combinemq
+	];
 
 	if (styles.prefix) processors.push(autoprefixer);
 	if (styles.minify) processors.push(cssnano);
