@@ -31,9 +31,8 @@ const imagemin = require('gulp-imagemin');
 // BrowserSync
 const browserSync = require('browser-sync').create();
 
-// Task lists
-const buildTasks = [];
-const watchTasks = [];
+// Tasks list
+const tasks = {};
 
 // --------------------------------------------------
 // Settings
@@ -43,8 +42,8 @@ const watchTasks = [];
 const styles = {
 	enabled: true,
 	clean: true,
-	minify: true,
-	prefix: true,
+	minify: false,
+	prefix: false,
 	sourcemaps: true,
 	bundles: [
 		{
@@ -98,7 +97,7 @@ const copy = {
 
 // Config: Reload
 const server = {
-	enabled: true,
+	enabled: false,
 	watch: './index.html',
 	config: {
 		server: '.'
@@ -107,9 +106,10 @@ const server = {
 };
 
 // --------------------------------------------------
-// Error Handler
+// Helpers
 // --------------------------------------------------
 
+// Custom error handler
 const error = function(err) {
 	const message =
 		'\n' +
@@ -123,6 +123,42 @@ const error = function(err) {
 	console.log(format(message));
 };
 
+// Add a new, named function to tasks[]
+const addTask = (name, func) => {
+	tasks[name] = getNamedFunc(name, func);
+};
+
+// Give the defined name to a function object
+// The name is used for Gulp cli output
+const getNamedFunc = (name, func) => {
+	Object.defineProperty(func, 'name', { value: name });
+	return func;
+};
+
+// Get tasks by name as []
+const getTasksByName = name => {
+	const taskList = [];
+
+	Object.keys(tasks).forEach(task => {
+		if (task.includes(name)) taskList.push(tasks[task]);
+	});
+
+	if (!taskList.length)
+		taskList.push(getNamedFunc(`${name}:disabled`, done => done()));
+
+	return taskList;
+};
+
+// Get tasks by name as gulp.series
+const getSeries = name => {
+	return gulp.series(getTasksByName(name));
+};
+
+// Get tasks by name as gulp.parallel
+const getParallel = name => {
+	return gulp.parallel(getTasksByName(name));
+};
+
 // --------------------------------------------------
 // Clean Destination Folders
 // --------------------------------------------------
@@ -131,18 +167,19 @@ const clean = function(done) {
 	const toDelete = [];
 
 	// Add output path from style.bundles
-	if (styles.enabled && styles.clean)
+	if (styles.clean)
 		styles.bundles.forEach(bundle => toDelete.push(bundle.output));
 
 	// Add output path from script.bundles
-	if (scripts.enabled && scripts.clean)
+	if (scripts.clean)
 		scripts.bundles.forEach(bundle => toDelete.push(bundle.output));
 
 	// Add output path from images
-	if (images.enabled && images.clean) toDelete.push(images.output);
+	if (images.clean) 
+		toDelete.push(images.output);
 
 	// Add output path from copy.bundles
-	if (copy.enabled && copy.clean)
+	if (copy.clean)
 		copy.bundles.forEach(bundle => toDelete.push(bundle.output));
 
 	// Clean paths (unique paths only)
@@ -155,28 +192,31 @@ const clean = function(done) {
 // BrowserSync
 // --------------------------------------------------
 
-const reload = function() {
-	if (!server.enabled) return;
+const serve = function(done) {
+	if (!server.enabled) return done();
 
 	browserSync.init(server.config);
 
 	gulp.watch(server.watch).on('change', browserSync.reload);
-}
+};
 
 // --------------------------------------------------
 // Compile Styles
 // --------------------------------------------------
 
 if (styles.enabled) {
-	// Create a new build task
-	const stylesBuild = function(bundle) {
-		const processors = [];
+	const processors = [];
 
-		if (styles.prefix) processors.push(autoprefixer);
-		if (styles.minify) processors.push(cssnano);
+	if (styles.prefix) processors.push(autoprefixer);
+	if (styles.minify) processors.push(cssnano);
 
-		gulp.task(bundle.buildName, function() {
-			return pipeline(
+	// Create tasks for each bundle in scripts
+	styles.bundles.forEach(bundle => {
+		const buildName = `build:css:${bundle.name}`;
+		const watchName = `watch:css:${bundle.name}`;
+
+		addTask(buildName, function(done) {
+			pipeline(
 				// Get the input files
 				gulp.src(bundle.input),
 
@@ -192,7 +232,7 @@ if (styles.enabled) {
 				sass(),
 
 				// Apply the PostCSS processors
-				postcss(processors),
+				gulpif(processors.length, postcss(processors)),
 
 				// Rename the output file
 				rename({
@@ -208,39 +248,13 @@ if (styles.enabled) {
 				// Trigger browser reload
 				gulpif(server.enabled, browserSync.stream())
 			);
+			done();
 		});
-	};
 
-	// Create a new watch task
-	const stylesWatch = function(bundle) {
-		gulp.task(bundle.watchName, function() {
-			return gulp.watch(bundle.input, gulp.series(bundle.buildName));
+		addTask(watchName, function() {
+			gulp.watch(bundle.input, tasks[buildName]);
 		});
-	};
-
-	// Init task arrays
-	styles.buildTasks = [];
-	styles.watchTasks = [];
-
-	// Create tasks for each bundle in styles
-	styles.bundles.forEach(bundle => {
-		bundle.buildName = 'build:css:' + bundle.name;
-		bundle.watchName = 'watch:css:' + bundle.name;
-
-		stylesBuild(bundle);
-		stylesWatch(bundle);
-
-		styles.buildTasks.push(bundle.buildName);
-		styles.watchTasks.push(bundle.watchName);
 	});
-
-	// Create tasks to run bundle tasks 
-	gulp.task('build:css', gulp.series(styles.buildTasks));
-	gulp.task('watch:css', gulp.parallel(styles.watchTasks));
-
-	// Add bundle tasks to global list
-	buildTasks.push('build:css');
-	watchTasks.push('watch:css');
 }
 
 // --------------------------------------------------
@@ -248,10 +262,13 @@ if (styles.enabled) {
 // --------------------------------------------------
 
 if (scripts.enabled) {
-	// Create a new build task
-	const scriptBuild = function(bundle) {
-		gulp.task(bundle.buildName, function() {
-			return pipeline(
+	// Create tasks for each bundle in scripts
+	scripts.bundles.forEach(bundle => {
+		const buildName = `build:js:${bundle.name}`;
+		const watchName = `watch:js:${bundle.name}`;
+
+		addTask(buildName, done => {
+			pipeline(
 				// Get the source files
 				gulp.src(bundle.input),
 
@@ -283,39 +300,13 @@ if (scripts.enabled) {
 				// Trigger browser reload
 				gulpif(server.enabled, browserSync.stream())
 			);
+			done();
 		});
-	};
 
-	// Create a new watch task
-	const scriptWatch = function(bundle) {
-		gulp.task(bundle.watchName, function() {
-			return gulp.watch(bundle.input, gulp.series(bundle.buildName));
+		addTask(watchName, () => {
+			gulp.watch(bundle.input, tasks[buildName]);
 		});
-	};
-
-	// Init task arrays
-	scripts.buildTasks = [];
-	scripts.watchTasks = [];
-
-	// Create tasks for each bundle in scripts
-	scripts.bundles.forEach(bundle => {
-		bundle.buildName = 'build:js:' + bundle.name;
-		bundle.watchName = 'watch:js:' + bundle.name;
-
-		scriptBuild(bundle);
-		scriptWatch(bundle);
-
-		scripts.buildTasks.push(bundle.buildName);
-		scripts.watchTasks.push(bundle.watchName);
 	});
-
-	// Create tasks to run bundle tasks 
-	gulp.task('build:js', gulp.series(scripts.buildTasks));
-	gulp.task('watch:js', gulp.parallel(scripts.watchTasks));
-
-	// Add bundle tasks to global list
-	buildTasks.push('build:js');
-	watchTasks.push('watch:js');
 }
 
 // --------------------------------------------------
@@ -323,9 +314,11 @@ if (scripts.enabled) {
 // --------------------------------------------------
 
 if (images.enabled) {
-	// Create a new build task
-	gulp.task('build:img', function() {
-		return pipeline(
+	const buildName = `build:img`;
+	const watchName = `watch:img`;
+
+	addTask(buildName, done => {
+		pipeline(
 			// Get the source files
 			gulp.src(images.input),
 
@@ -335,16 +328,12 @@ if (images.enabled) {
 			// Output the images
 			gulp.dest(images.output)
 		);
+		done();
 	});
 
-	// Create a new watch task
-	gulp.task('watch:img', function() {
-		return gulp.watch(images.input, gulp.series('build:img'));
+	addTask(watchName, () => {
+		gulp.watch(images.input, tasks[buildName]);
 	});
-
-	// Add tasks to global list
-	buildTasks.push('build:img');
-	watchTasks.push('watch:img');
 }
 
 // --------------------------------------------------
@@ -352,69 +341,51 @@ if (images.enabled) {
 // --------------------------------------------------
 
 if (copy.enabled) {
-	// Create a new build task
-	const copyBuild = function(bundle) {
-		gulp.task(bundle.buildName, function() {
-			return pipeline(
+	// Create tasks for each bundle in scripts
+	copy.bundles.forEach(bundle => {
+		const buildName = `build:copy:${bundle.name}`;
+		const watchName = `watch:copy:${bundle.name}`;
+
+		addTask(buildName, done => {
+			pipeline(
 				// Get the source files
 				gulp.src(bundle.input),
 
 				// Output the files
 				gulp.dest(bundle.output)
 			);
+			done();
 		});
-	};
 
-	// Create a new watch task
-	const copyWatch = function(bundle) {
-		gulp.task(bundle.watchName, function() {
-			return gulp.watch(bundle.input, gulp.series(bundle.buildName));
+		addTask(watchName, () => {
+			gulp.watch(bundle.input, tasks[buildName]);
 		});
-	};
-
-	// Init task arrays
-	copy.buildTasks = [];
-	copy.watchTasks = [];
-
-	// Create tasks for each bundle
-	copy.bundles.forEach(bundle => {
-		bundle.buildName = 'build:copy:' + bundle.name;
-		bundle.watchName = 'watch:copy:' + bundle.name;
-
-		copyBuild(bundle);
-		copyWatch(bundle);
-
-		copy.buildTasks.push(bundle.buildName);
-		copy.watchTasks.push(bundle.watchName);
 	});
-
-	// Create tasks to run bundle tasks 
-	gulp.task('build:copy', gulp.series(copy.buildTasks));
-	gulp.task('watch:copy', gulp.parallel(copy.watchTasks));
-
-	// Add bundle tasks to global list
-	buildTasks.push('build:copy');
-	watchTasks.push('watch:copy');
 }
 
 // --------------------------------------------------
 // Exports
 // --------------------------------------------------
 
-// Prevent an error if all of the features are disabled
-if (!buildTasks.length) buildTasks.push(done => done());
-if (!watchTasks.length) watchTasks.push(done => done());
+// console.log(tasks) // View generated tasks
 
-exports.clean = gulp.series(clean);
+module.exports = {
+	'clean': 		clean,
+	'serve': 		gulp.parallel(serve, getTasksByName('watch')),
+	'build:css': 	getSeries('build:css'),
+	'build:js': 	getSeries('build:js'),
+	'build:copy': 	getSeries('build:copy'),
+	'build:img': 	getSeries('build:img'),
+	'build': 		getSeries('build'),
+	'watch:css': 	getParallel('watch:css'),
+	'watch:js': 	getParallel('watch:js'),
+	'watch:copy': 	getParallel('watch:copy'),
+	'watch:img': 	getParallel('watch:img'),
+	'watch': 		getParallel('watch')
+};
 
-exports.build = gulp.series(buildTasks);
-
-exports.watch = gulp.parallel(watchTasks);
-
-exports.serve = gulp.parallel(reload, watchTasks);
-
-exports.default = gulp.series(
-	exports.clean, 
-	exports.build, 
-	exports.serve
+module.exports.default = gulp.series(
+	clean,
+	getSeries('build'),
+	gulp.parallel(serve, getTasksByName('watch'))
 );
