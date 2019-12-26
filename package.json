@@ -34,7 +34,6 @@
     "gulp-sass": "^4.0.2",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-terser": "^1.2.0",
-    "postcss-combine-media-query": "^1.0.0",
     "readable-stream": "^3.4.0",
     "string-kit": "^0.11.2"
   }
