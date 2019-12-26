@@ -53,6 +53,11 @@ header {
         padding-top: 40px;
         padding-bottom: 40px;
     }
+
+    @media (min-width: 768px) {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
 }
 
 main {
@@ -69,6 +74,11 @@ footer {
     @media (min-width: 1200px) {
         padding-top: 40px;
         padding-bottom: 40px;
+    }
+
+    @media (min-width: 768px) {
+        padding-top: 30px;
+        padding-bottom: 30px;
     }
 }
 
