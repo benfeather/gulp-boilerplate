@@ -109,10 +109,6 @@ const server = {
 // Helpers
 // --------------------------------------------------
 
-// --------------------------------------------------
-// Helpers
-// --------------------------------------------------
-
 /** @description A custom error handler to print prettier, more concise errors */
 const error = (err) => {
 	const message =
@@ -165,14 +161,14 @@ const getTasks = (name) => {
  *  @param {string} name The name used to search the tasks object.
  */
 const getSeries = (name) => {
-	return series(getTasks(name));
+	return gulp.series(getTasks(name));
 };
 
 /** @description Get tasks by name as a parallel.
  *  @param {string} name The name used to search the tasks object.
  */
 const getParallel = (name) => {
-	return parallel(getTasks(name));
+	return gulp.parallel(getTasks(name));
 };
 
 // --------------------------------------------------
