@@ -16,6 +16,7 @@ const pipeline = require('readable-stream').pipeline;
 
 // CSS
 const sass = require('gulp-sass');
+const stylelint = require('gulp-stylelint');
 const postcss = require('gulp-postcss');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
@@ -46,6 +47,10 @@ const styles = {
 	minify: true,
 	prefix: true,
 	sourcemaps: true,
+	lint: {
+		enabled: true,
+		input: './assets/sass/**/*.{scss,sass}'
+	},
 	bundles: [
 		{
 			name: 'main',
@@ -133,7 +138,7 @@ const error = (err) => {
  *  @param {function} func The task function.
  */
 const addTask = (name, func) => {
-	return tasks[name] = getNamedFunc(name, func);
+	return (tasks[name] = getNamedFunc(name, func));
 };
 
 /** @description Assign the given name to a function object.
@@ -141,7 +146,7 @@ const addTask = (name, func) => {
  *  @param {function} func The function to name.
  */
 const getNamedFunc = (name, func) => {
-	Object.defineProperty(func, 'name', { value: name });
+	Object.defineProperty(func, 'name', {value: name});
 	return func;
 };
 
@@ -152,12 +157,12 @@ const getNamedFunc = (name, func) => {
 const getTasks = (name) => {
 	const taskList = [];
 
-	Object.keys(tasks).forEach(task => {
+	Object.keys(tasks).forEach((task) => {
 		if (task.startsWith(name)) taskList.push(tasks[task]);
 	});
 
 	if (!taskList.length)
-		taskList.push(getNamedFunc(`${name}:disabled`, done => done()));
+		taskList.push(getNamedFunc(`${name}:disabled`, (done) => done()));
 
 	return taskList;
 };
@@ -185,19 +190,18 @@ const clean = (done) => {
 
 	// Add output path from style.bundles
 	if (styles.clean)
-		styles.bundles.forEach(bundle => toDelete.push(bundle.output));
+		styles.bundles.forEach((bundle) => toDelete.push(bundle.output));
 
 	// Add output path from script.bundles
 	if (scripts.clean)
-		scripts.bundles.forEach(bundle => toDelete.push(bundle.output));
+		scripts.bundles.forEach((bundle) => toDelete.push(bundle.output));
 
 	// Add output path from images
-	if (images.clean) 
-		toDelete.push(images.output);
+	if (images.clean) toDelete.push(images.output);
 
 	// Add output path from copy.bundles
 	if (copy.clean)
-		copy.bundles.forEach(bundle => toDelete.push(bundle.output));
+		copy.bundles.forEach((bundle) => toDelete.push(bundle.output));
 
 	// Clean paths (unique paths only)
 	del.sync([...new Set(toDelete)]);
@@ -273,6 +277,21 @@ if (styles.enabled) {
 	});
 }
 
+const lintCSS = (done) => {
+	if (!styles.lint.enabled) return done();
+
+	pipeline(
+		// Get the source files
+		gulp.src(styles.lint.input),
+
+		// lint JS
+		stylelint({
+			reporters: [{formatter: 'string', console: true}]
+		})
+	);
+	done();
+};
+
 // --------------------------------------------------
 // Compile Scripts
 // --------------------------------------------------
@@ -325,8 +344,7 @@ if (scripts.enabled) {
 }
 
 const lintJS = (done) => {
-
-	if (!scripts.lint.enabled) done();
+	if (!scripts.lint.enabled) return done();
 
 	pipeline(
 		// Get the source files
@@ -401,19 +419,20 @@ if (copy.enabled) {
 // console.log(tasks) // View generated tasks
 
 module.exports = {
-	'clean': 		clean,
-	'serve': 		gulp.parallel(serve, getTasks('watch')),
-	'build:css': 	getSeries('build:css'),
-	'build:js': 	getSeries('build:js'),
-	'build:copy': 	getSeries('build:copy'),
-	'build:img': 	getSeries('build:img'),
-	'build': 		getSeries('build'),
-	'watch:css': 	getParallel('watch:css'),
-	'watch:js': 	getParallel('watch:js'),
-	'watch:copy': 	getParallel('watch:copy'),
-	'watch:img': 	getParallel('watch:img'),
-	'watch': 		getParallel('watch'),
-	'lint:js':		lintJS
+	'clean': clean,
+	'serve': gulp.parallel(serve, getTasks('watch')),
+	'build:css': getSeries('build:css'),
+	'build:js': getSeries('build:js'),
+	'build:copy': getSeries('build:copy'),
+	'build:img': getSeries('build:img'),
+	'build': getSeries('build'),
+	'watch:css': getParallel('watch:css'),
+	'watch:js': getParallel('watch:js'),
+	'watch:copy': getParallel('watch:copy'),
+	'watch:img': getParallel('watch:img'),
+	'watch': getParallel('watch'),
+	'lint:js': lintJS,
+	'lint:css': lintCSS
 };
 
 module.exports.default = gulp.series(
