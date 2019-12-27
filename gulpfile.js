@@ -24,6 +24,7 @@ const cssnano = require('cssnano');
 const concat = require('gulp-concat');
 const babel = require('gulp-babel');
 const terser = require('gulp-terser');
+const eslint = require('gulp-eslint');
 
 // Images
 const imagemin = require('gulp-imagemin');
@@ -60,6 +61,10 @@ const scripts = {
 	clean: true,
 	minify: true,
 	sourcemaps: true,
+	lint: {
+		enabled: true,
+		input: './assets/js/**/*.js'
+	},
 	bundles: [
 		{
 			name: 'main',
@@ -319,6 +324,23 @@ if (scripts.enabled) {
 	});
 }
 
+const lintJS = (done) => {
+
+	if (!scripts.lint.enabled) done();
+
+	pipeline(
+		// Get the source files
+		gulp.src(scripts.lint.input),
+
+		// lint JS
+		eslint(),
+
+		// Output problems
+		eslint.format()
+	);
+	done();
+};
+
 // --------------------------------------------------
 // Images
 // --------------------------------------------------
@@ -390,7 +412,8 @@ module.exports = {
 	'watch:js': 	getParallel('watch:js'),
 	'watch:copy': 	getParallel('watch:copy'),
 	'watch:img': 	getParallel('watch:img'),
-	'watch': 		getParallel('watch')
+	'watch': 		getParallel('watch'),
+	'lint:js':		lintJS
 };
 
 module.exports.default = gulp.series(
