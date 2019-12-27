@@ -109,7 +109,11 @@ const server = {
 // Helpers
 // --------------------------------------------------
 
-// Custom error handler
+// --------------------------------------------------
+// Helpers
+// --------------------------------------------------
+
+/** @description A custom error handler to print prettier, more concise errors */
 const error = (err) => {
 	const message =
 		'\n' +
@@ -123,24 +127,32 @@ const error = (err) => {
 	console.log(format(message));
 };
 
-// Add a new, named function to tasks[]
+/** @description Add a new, named function to the tasks object.
+ *  @param {string} name The task name (object key/function name).
+ *  @param {function} func The task function.
+ */
 const addTask = (name, func) => {
-	tasks[name] = getNamedFunc(name, func);
+	return tasks[name] = getNamedFunc(name, func);
 };
 
-// Give the defined name to a function object
-// The name is used for Gulp cli output
+/** @description Assign the given name to a function object.
+ *  @param {string} name The name given to the function.
+ *  @param {function} func The function to name.
+ */
 const getNamedFunc = (name, func) => {
 	Object.defineProperty(func, 'name', { value: name });
 	return func;
 };
 
-// Get tasks by name as []
+/** @description Get tasks by name.
+ *  @param {string} name The name used to search the tasks object.
+ *  @returns {function[]} An array of functions.
+ */
 const getTasks = (name) => {
 	const taskList = [];
 
 	Object.keys(tasks).forEach(task => {
-		if (task.includes(name)) taskList.push(tasks[task]);
+		if (task.startsWith(name)) taskList.push(tasks[task]);
 	});
 
 	if (!taskList.length)
@@ -149,14 +161,18 @@ const getTasks = (name) => {
 	return taskList;
 };
 
-// Get tasks by name as gulp.series
+/** @description Get tasks by name as a series.
+ *  @param {string} name The name used to search the tasks object.
+ */
 const getSeries = (name) => {
-	return gulp.series(getTasks(name));
+	return series(getTasks(name));
 };
 
-// Get tasks by name as gulp.parallel
+/** @description Get tasks by name as a parallel.
+ *  @param {string} name The name used to search the tasks object.
+ */
 const getParallel = (name) => {
-	return gulp.parallel(getTasks(name));
+	return parallel(getTasks(name));
 };
 
 // --------------------------------------------------
