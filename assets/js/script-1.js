@@ -1,7 +1,5 @@
 'use strict';
 
 const foo = () => {
-    console.log('My custom script #1');
+    console.log('This function is never called!')
 }
-
-foo();
