@@ -358,7 +358,9 @@ if (images.enabled) {
 			src(images.input),
 
 			// Optimise PNG, JPG, GIF and SVG images
-			imagemin(),
+			imagemin({
+				silent: true
+			}),
 
 			// Output the images
 			dest(images.output)
