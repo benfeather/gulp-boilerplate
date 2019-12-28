@@ -5,14 +5,14 @@
 // --------------------------------------------------
 
 // General
-const gulp = require('gulp');
+const {src, dest, watch, series, parallel} = require('gulp');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const plumber = require('gulp-plumber');
 const gulpif = require('gulp-if');
 const del = require('del');
-const format = require('string-kit').format;
-const pipeline = require('readable-stream').pipeline;
+const {format} = require('string-kit');
+const {pipeline} = require('readable-stream');
 
 // CSS
 const sass = require('gulp-sass');
@@ -33,8 +33,8 @@ const imagemin = require('gulp-imagemin');
 // BrowserSync
 const browserSync = require('browser-sync').create();
 
-// Tasks list
-const tasks = {};
+// Tasks will be added to this array
+const tasks = [];
 
 // --------------------------------------------------
 // Settings
@@ -133,14 +133,6 @@ const error = (err) => {
 	console.log(format(message));
 };
 
-/** @description Add a new, named function to the tasks object.
- *  @param {string} name The task name (object key/function name).
- *  @param {function} func The task function.
- */
-const addTask = (name, func) => {
-	return (tasks[name] = getNamedFunc(name, func));
-};
-
 /** @description Assign the given name to a function object.
  *  @param {string} name The name given to the function.
  *  @param {function} func The function to name.
@@ -150,76 +142,69 @@ const getNamedFunc = (name, func) => {
 	return func;
 };
 
+/** @description Add a new, named function to the tasks array.
+ *  @param {string} name The task (function) name.
+ *  @param {function} func The task (function).
+ */
+const addTask = (name, func) => {
+	return tasks.push(getNamedFunc(name, func));
+};
+
 /** @description Get tasks by name.
- *  @param {string} name The name used to search the tasks object.
- *  @returns {function[]} An array of functions.
+ *  @param {string} name The name used to search the tasks array.
+ *  @returns {function|function[]} A function or an array of functions.
  */
 const getTasks = (name) => {
-	const taskList = [];
+	const taskList = tasks.filter((task) => task.name.startsWith(name));
 
-	Object.keys(tasks).forEach((task) => {
-		if (task.startsWith(name)) taskList.push(tasks[task]);
-	});
+	if (taskList.length == 0)
+		return getNamedFunc(`${name}:disabled`, (done) => done());
 
-	if (!taskList.length)
-		taskList.push(getNamedFunc(`${name}:disabled`, (done) => done()));
+	if (taskList.length == 1) return taskList[0];
 
 	return taskList;
-};
-
-/** @description Get tasks by name as a series.
- *  @param {string} name The name used to search the tasks object.
- */
-const getSeries = (name) => {
-	return gulp.series(getTasks(name));
-};
-
-/** @description Get tasks by name as a parallel.
- *  @param {string} name The name used to search the tasks object.
- */
-const getParallel = (name) => {
-	return gulp.parallel(getTasks(name));
 };
 
 // --------------------------------------------------
 // Clean Destination Folders
 // --------------------------------------------------
 
-const clean = (done) => {
-	const toDelete = [];
+if (styles.clean || scripts.clean || images.clean || copy.clean) {
+	addTask('clean', (done) => {
+		const toDelete = [];
 
-	// Add output path from style.bundles
-	if (styles.clean)
-		styles.bundles.forEach((bundle) => toDelete.push(bundle.output));
+		// Add output path from style.bundles
+		if (styles.clean)
+			styles.bundles.forEach((bundle) => toDelete.push(bundle.output));
 
-	// Add output path from script.bundles
-	if (scripts.clean)
-		scripts.bundles.forEach((bundle) => toDelete.push(bundle.output));
+		// Add output path from script.bundles
+		if (scripts.clean)
+			scripts.bundles.forEach((bundle) => toDelete.push(bundle.output));
 
-	// Add output path from images
-	if (images.clean) toDelete.push(images.output);
+		// Add output path from images
+		if (images.clean) toDelete.push(images.output);
 
-	// Add output path from copy.bundles
-	if (copy.clean)
-		copy.bundles.forEach((bundle) => toDelete.push(bundle.output));
+		// Add output path from copy.bundles
+		if (copy.clean)
+			copy.bundles.forEach((bundle) => toDelete.push(bundle.output));
 
-	// Clean paths (unique paths only)
-	del.sync([...new Set(toDelete)]);
+		// Clean paths (unique paths only)
+		del.sync([...new Set(toDelete)]);
 
-	done();
-};
+		done();
+	});
+}
 
 // --------------------------------------------------
 // BrowserSync
 // --------------------------------------------------
 
-const serve = (done) => {
-	if (!server.enabled) return done();
-
-	browserSync.init(server.config);
-
-	gulp.watch(server.watch).on('change', browserSync.reload);
-};
+if (server.enabled) {
+	addTask('serve', () => {
+		browserSync.init(server.config);
+		watch(server.watch).on('change', browserSync.reload);
+	});
+}
 
 // --------------------------------------------------
 // Compile Styles
@@ -238,7 +223,7 @@ if (styles.enabled) {
 		addTask(buildName, (done) => {
 			pipeline(
 				// Get the input files
-				gulp.src(bundle.input),
+				src(bundle.input),
 
 				// Init the custom error handling
 				plumber({
@@ -263,7 +248,7 @@ if (styles.enabled) {
 				gulpif(styles.sourcemaps, sourcemaps.write('.')),
 
 				// Output the compiled css
-				gulp.dest(bundle.output),
+				dest(bundle.output),
 
 				// Trigger browser reload
 				gulpif(server.enabled, browserSync.stream())
@@ -272,25 +257,25 @@ if (styles.enabled) {
 		});
 
 		addTask(watchName, () => {
-			gulp.watch(bundle.input, tasks[buildName]);
+			watch(bundle.input, getTasks(buildName));
 		});
 	});
 }
 
-const lintCSS = (done) => {
-	if (!styles.lint.enabled) return done();
+if (styles.lint.enabled) {
+	addTask('lint:css', (done) => {
+		pipeline(
+			// Get the source files
+			src(styles.lint.input),
 
-	pipeline(
-		// Get the source files
-		gulp.src(styles.lint.input),
-
-		// lint JS
-		stylelint({
-			reporters: [{formatter: 'string', console: true}]
-		})
-	);
-	done();
-};
+			// lint JS
+			stylelint({
+				reporters: [{formatter: 'string', console: true}]
+			})
+		);
+		done();
+	});
+}
 
 // --------------------------------------------------
 // Compile Scripts
@@ -304,7 +289,7 @@ if (scripts.enabled) {
 		addTask(buildName, (done) => {
 			pipeline(
 				// Get the source files
-				gulp.src(bundle.input),
+				src(bundle.input),
 
 				// Init the custom error handling
 				plumber({
@@ -329,7 +314,7 @@ if (scripts.enabled) {
 				gulpif(scripts.sourcemaps, sourcemaps.write('.')),
 
 				// Output the compiled js
-				gulp.dest(bundle.output),
+				dest(bundle.output),
 
 				// Trigger browser reload
 				gulpif(server.enabled, browserSync.stream())
@@ -338,26 +323,26 @@ if (scripts.enabled) {
 		});
 
 		addTask(watchName, () => {
-			gulp.watch(bundle.input, tasks[buildName]);
+			watch(bundle.input, getTasks(buildName));
 		});
 	});
 }
 
-const lintJS = (done) => {
-	if (!scripts.lint.enabled) return done();
+if (scripts.lint.enabled) {
+	addTask('lint:js', (done) => {
+		pipeline(
+			// Get the source files
+			src(scripts.lint.input),
 
-	pipeline(
-		// Get the source files
-		gulp.src(scripts.lint.input),
+			// lint JS
+			eslint(),
 
-		// lint JS
-		eslint(),
-
-		// Output problems
-		eslint.format()
-	);
-	done();
-};
+			// Output problems
+			eslint.format()
+		);
+		done();
+	});
+}
 
 // --------------------------------------------------
 // Images
@@ -370,19 +355,19 @@ if (images.enabled) {
 	addTask(buildName, (done) => {
 		pipeline(
 			// Get the source files
-			gulp.src(images.input),
+			src(images.input),
 
 			// Optimise PNG, JPG, GIF and SVG images
 			imagemin(),
 
 			// Output the images
-			gulp.dest(images.output)
+			dest(images.output)
 		);
 		done();
 	});
 
 	addTask(watchName, () => {
-		gulp.watch(images.input, tasks[buildName]);
+		watch(images.input, getTasks(buildName));
 	});
 }
 
@@ -398,16 +383,16 @@ if (copy.enabled) {
 		addTask(buildName, (done) => {
 			pipeline(
 				// Get the source files
-				gulp.src(bundle.input),
+				src(bundle.input),
 
 				// Output the files
-				gulp.dest(bundle.output)
+				dest(bundle.output)
 			);
 			done();
 		});
 
 		addTask(watchName, () => {
-			gulp.watch(bundle.input, tasks[buildName]);
+			watch(bundle.input, getTasks(buildName));
 		});
 	});
 }
@@ -416,27 +401,26 @@ if (copy.enabled) {
 // Exports
 // --------------------------------------------------
 
-// console.log(tasks) // View generated tasks
-
+// prettier-ignore
 module.exports = {
-	'clean': clean,
-	'serve': gulp.parallel(serve, getTasks('watch')),
-	'build:css': getSeries('build:css'),
-	'build:js': getSeries('build:js'),
-	'build:copy': getSeries('build:copy'),
-	'build:img': getSeries('build:img'),
-	'build': getSeries('build'),
-	'watch:css': getParallel('watch:css'),
-	'watch:js': getParallel('watch:js'),
-	'watch:copy': getParallel('watch:copy'),
-	'watch:img': getParallel('watch:img'),
-	'watch': getParallel('watch'),
-	'lint:js': lintJS,
-	'lint:css': lintCSS
+	'clean': 		series(getTasks('clean')),
+	'serve': 		series(getTasks('serve')),
+	'build:css': 	series(getTasks('build:css')),
+	'build:js': 	series(getTasks('build:js')),
+	'build:copy': 	series(getTasks('build:copy')),
+	'build:img': 	series(getTasks('build:img')),
+	'build': 		series(getTasks('build')),
+	'watch:css': 	parallel(getTasks('watch:css')),
+	'watch:js': 	parallel(getTasks('watch:js')),
+	'watch:copy': 	parallel(getTasks('watch:copy')),
+	'watch:img': 	parallel(getTasks('watch:img')),
+	'watch': 		parallel(getTasks('watch')),
+	'lint:js': 		series(getTasks('lint:js')),
+	'lint:css': 	series(getTasks('lint:css')),
+	'lint': 		series(getTasks('lint')),
+	'default': 		series(
+						series(getTasks('clean')),
+						series(getTasks('build')),
+						parallel(getTasks('serve'), getTasks('watch'))
+					)
 };
-
-module.exports.default = gulp.series(
-	clean,
-	getSeries('build'),
-	gulp.parallel(serve, getTasks('watch'))
-);
