@@ -166,36 +166,6 @@ const getTasks = (name) => {
 };
 
 // --------------------------------------------------
-// Clean Destination Folders
-// --------------------------------------------------
-
-if (styles.clean || scripts.clean || images.clean || copy.clean) {
-	addTask('clean', (done) => {
-		const toDelete = [];
-
-		// Add output path from style.bundles
-		if (styles.clean)
-			styles.bundles.forEach((bundle) => toDelete.push(bundle.output));
-
-		// Add output path from script.bundles
-		if (scripts.clean)
-			scripts.bundles.forEach((bundle) => toDelete.push(bundle.output));
-
-		// Add output path from images
-		if (images.clean) toDelete.push(images.output);
-
-		// Add output path from copy.bundles
-		if (copy.clean)
-			copy.bundles.forEach((bundle) => toDelete.push(bundle.output));
-
-		// Clean paths (unique paths only)
-		del.sync([...new Set(toDelete)]);
-
-		done();
-	});
-}
-
-// --------------------------------------------------
 // BrowserSync
 // --------------------------------------------------
 
@@ -207,7 +177,7 @@ if (server.enabled) {
 }
 
 // --------------------------------------------------
-// Compile Styles
+// Styles
 // --------------------------------------------------
 
 if (styles.enabled) {
@@ -277,8 +247,20 @@ if (styles.lint.enabled) {
 	});
 }
 
+if (styles.clean) {
+	addTask('clean:css', (done) => {
+		const toDelete = [];
+
+		styles.bundles.forEach((bundle) => toDelete.push(bundle.output));
+
+		del.sync([...new Set(toDelete)]); // Clean unique paths only
+
+		done();
+	});
+}
+
 // --------------------------------------------------
-// Compile Scripts
+// Scripts
 // --------------------------------------------------
 
 if (scripts.enabled) {
@@ -344,6 +326,18 @@ if (scripts.lint.enabled) {
 	});
 }
 
+if (scripts.clean) {
+	addTask('clean:js', (done) => {
+		const toDelete = [];
+
+		scripts.bundles.forEach((bundle) => toDelete.push(bundle.output));
+
+		del.sync([...new Set(toDelete)]); // Clean unique paths only
+
+		done();
+	});
+}
+
 // --------------------------------------------------
 // Images
 // --------------------------------------------------
@@ -373,6 +367,13 @@ if (images.enabled) {
 	});
 }
 
+if (images.clean) {
+	addTask('clean:img', (done) => {
+		del.sync(images.output);
+		done();
+	});
+}
+
 // --------------------------------------------------
 // Copy
 // --------------------------------------------------
@@ -396,6 +397,18 @@ if (copy.enabled) {
 		addTask(watchName, () => {
 			watch(bundle.input, getTasks(buildName));
 		});
+	});
+}
+
+if (copy.clean) {
+	addTask('clean:copy', (done) => {
+		const toDelete = [];
+
+		copy.bundles.forEach((bundle) => toDelete.push(bundle.output));
+
+		del.sync([...new Set(toDelete)]); // Clean unique paths only
+
+		done();
 	});
 }
 
