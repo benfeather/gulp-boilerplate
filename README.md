@@ -57,7 +57,7 @@ Using the settings you can:
 
 ### Bundles
 
-This boilerplate allows you to create separate "bundles" by simply creating a new object in the task config:
+This boilerplate allows you to create separate files ("bundles") by simply adding objects to the bundles array in the task config:
 
 ```js
 const styles = {
@@ -73,8 +73,6 @@ const styles = {
 };
 ```
 
-The config above will create a new CSS file (bundle) called `bundle.css` in the `dist/css` folder. 
+The config above will create a new CSS bundle called `bundle.css` in the `dist/css` folder. 
 
-The contents of this file will be the compiled Sass from the files in the `assets/sass` folder with the `.sass` or `.scss` file extensions.
-
-You can create another bundle by adding a new object to the `bundles` array.
+This bundle will consist of the compiled sass from all of the files in the `assets/sass` folder.
