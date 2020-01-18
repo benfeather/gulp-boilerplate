@@ -40,14 +40,14 @@ This Gulp Boilerplate makes it easy to customize the tool for projects without h
 
 Each task has an associated configuration object located at the top of `gulpfile.js`. A basic configuration object will look something like this:
 
-`
+```js
 const configName = {
 	enabled: true,
 	clean: true,
 	sourcemaps: true,
 	bundles: []
 };
-`
+```
 
 Using the settings you can:
   - Enable/disable all of the related tasks
@@ -59,7 +59,7 @@ Using the settings you can:
 
 This boilerplate allows you to create separate "bundles" by simply creating a new object in the task config:
 
-`
+```js
 const styles = {
 	enabled: true,
 	...
@@ -71,4 +71,4 @@ const styles = {
 		}
 	]
 };
-`
+```
