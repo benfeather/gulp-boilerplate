@@ -1,42 +1,6 @@
 'use strict';
 
 // --------------------------------------------------
-// Global
-// --------------------------------------------------
-
-// General
-const {src, dest, watch, series, parallel} = require('gulp');
-const rename = require('gulp-rename');
-const sourcemaps = require('gulp-sourcemaps');
-const plumber = require('gulp-plumber');
-const gulpIf = require('gulp-if');
-const del = require('del');
-const {format} = require('string-kit');
-const {pipeline} = require('readable-stream');
-
-// CSS
-const sass = require('gulp-sass');
-const stylelint = require('gulp-stylelint');
-const postcss = require('gulp-postcss');
-const autoprefixer = require('autoprefixer');
-const cssnano = require('cssnano');
-
-// JS
-const concat = require('gulp-concat');
-const babel = require('gulp-babel');
-const terser = require('gulp-terser');
-const eslint = require('gulp-eslint');
-
-// Images
-const imagemin = require('gulp-imagemin');
-
-// BrowserSync
-const browserSync = require('browser-sync').create();
-
-// Tasks will be added to this array
-const tasks = [];
-
-// --------------------------------------------------
 // Settings
 // --------------------------------------------------
 
@@ -110,6 +74,42 @@ const server = {
 		//proxy: "http://localhost/"
 	}
 };
+
+// --------------------------------------------------
+// Global
+// --------------------------------------------------
+
+// General
+const {src, dest, watch, series, parallel} = require('gulp');
+const rename = require('gulp-rename');
+const sourcemaps = require('gulp-sourcemaps');
+const plumber = require('gulp-plumber');
+const gulpIf = require('gulp-if');
+const del = require('del');
+const {format} = require('string-kit');
+const {pipeline} = require('readable-stream');
+
+// CSS
+const sass = require('gulp-sass');
+const stylelint = require('gulp-stylelint');
+const postcss = require('gulp-postcss');
+const autoprefixer = require('autoprefixer');
+const cssnano = require('cssnano');
+
+// JS
+const concat = require('gulp-concat');
+const babel = require('gulp-babel');
+const terser = require('gulp-terser');
+const eslint = require('gulp-eslint');
+
+// Images
+const imagemin = require('gulp-imagemin');
+
+// BrowserSync
+const browserSync = require('browser-sync').create();
+
+// Tasks will be added to this array
+const tasks = [];
 
 // --------------------------------------------------
 // Helpers
