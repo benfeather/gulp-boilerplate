@@ -9,7 +9,7 @@ const {src, dest, watch, series, parallel} = require('gulp');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const plumber = require('gulp-plumber');
-const gulpif = require('gulp-if');
+const gulpIf = require('gulp-if');
 const del = require('del');
 const {format} = require('string-kit');
 const {pipeline} = require('readable-stream');
@@ -205,13 +205,13 @@ if (styles.enabled) {
 				}),
 
 				// Init the sourcemap
-				gulpif(styles.sourcemaps, sourcemaps.init()),
+				gulpIf(styles.sourcemaps, sourcemaps.init()),
 
 				// Compile sass
 				sass(),
 
 				// Apply the PostCSS processors
-				gulpif(processors.length, postcss(processors)),
+				gulpIf(processors.length, postcss(processors)),
 
 				// Rename the output file
 				rename({
@@ -219,13 +219,13 @@ if (styles.enabled) {
 				}),
 
 				// Output the sourcemap
-				gulpif(styles.sourcemaps, sourcemaps.write('.')),
+				gulpIf(styles.sourcemaps, sourcemaps.write('.')),
 
 				// Output the compiled css
 				dest(bundle.output),
 
 				// Trigger browser reload
-				gulpif(server.enabled, browserSync.stream())
+				gulpIf(server.enabled, browserSync.stream())
 			);
 			done();
 		});
@@ -283,7 +283,7 @@ if (scripts.enabled) {
 				}),
 
 				// Init the source map
-				gulpif(scripts.sourcemaps, sourcemaps.init()),
+				gulpIf(scripts.sourcemaps, sourcemaps.init()),
 
 				// Babel
 				babel({
@@ -295,16 +295,16 @@ if (scripts.enabled) {
 				concat(bundle.name + '.js'),
 
 				// Minify
-				gulpif(scripts.minify, terser()),
+				gulpIf(scripts.minify, terser()),
 
 				// Write the source map
-				gulpif(scripts.sourcemaps, sourcemaps.write('.')),
+				gulpIf(scripts.sourcemaps, sourcemaps.write('.')),
 
 				// Output the compiled js
 				dest(bundle.output),
 
 				// Trigger browser reload
-				gulpif(server.enabled, browserSync.stream())
+				gulpIf(server.enabled, browserSync.stream())
 			);
 			done();
 		});
