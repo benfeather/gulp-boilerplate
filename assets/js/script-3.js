@@ -1,7 +1,7 @@
 'use strict';
 
-const vendor = () => {
-	console.log('Hello from vendor');
+const bar = () => {
+	console.log('Hello from script #3');
 };
 
-vendor();
+bar();

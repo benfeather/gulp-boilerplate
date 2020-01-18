@@ -1,7 +1,7 @@
 'use strict';
 
-const bar = () => {
+const foo = () => {
 	console.log('Hello from script #2');
 };
 
-bar();
+foo();

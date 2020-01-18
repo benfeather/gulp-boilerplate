@@ -1,5 +1,5 @@
 'use strict';
 
-const foo = () => {
+const noRun = () => {
 	console.log('This function is never called!');
 };
