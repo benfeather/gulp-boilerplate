@@ -7,10 +7,12 @@ A boilerplate for building web projects with [Gulp](https://gulpjs.com/). This p
 - Create CSS and JS bundles without having to manually create separate tasks.
 - Easily turn features on/off using the config objects. 
 - Compile (babel), concatenate, minify, and lint JavaScript.
-- Compile, minify, autoprefix, and lint Sass/SCSS.
+- Compile (Sass), minify, autoprefix, and lint CSS.
 - Optimize Images (PNG, JPG, GIF and SVG).
 - Copy static files and folders into your `dist` directory.
 - Watch for file changes, automatically recompile your code and reload your browser
+- Preconfigured Prettier for code formatting.
+- Preconfigured Browserlist file.
 
 ## Getting Started
 
