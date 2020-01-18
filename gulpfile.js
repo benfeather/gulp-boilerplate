@@ -73,12 +73,16 @@ const scripts = {
 	bundles: [
 		{
 			name: 'main',
-			input: ['./assets/js/script-1.js', './assets/js/script-2.js'],
+			input: [
+				'./assets/js/script-1.js',
+				'./assets/js/script-2.js',
+				'./assets/js/script-3.js'
+			],
 			output: './dist/js/'
 		},
 		{
 			name: 'vendor',
-			input: './assets/js/script-3.js',
+			input: './node_modules/lodash/lodash.js',
 			output: './dist/js/'
 		}
 	]
@@ -278,21 +282,22 @@ if (scripts.enabled) {
 					errorHandler: error
 				}),
 
-				// Init the sourcemap
+				// Init the source map
 				gulpif(scripts.sourcemaps, sourcemaps.init()),
+
+				// Babel
+				babel({
+					presets: ['@babel/env'],
+					ignore: ['node_modules']
+				}),
 
 				// Combine the files and rename
 				concat(bundle.name + '.js'),
 
-				// Babel
-				babel({
-					presets: ['@babel/env']
-				}),
-
 				// Minify
 				gulpif(scripts.minify, terser()),
 
-				// Write the sourcemap
+				// Write the source map
 				gulpif(scripts.sourcemaps, sourcemaps.write('.')),
 
 				// Output the compiled js
