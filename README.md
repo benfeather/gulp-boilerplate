@@ -79,4 +79,4 @@ The config above will create a new CSS bundle called `bundle.css` in the `dist/c
 
 ## License
 
-The code is available under the [MIT License](LICENSE.md).
+The code is available under the MIT License.
