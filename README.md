@@ -76,3 +76,7 @@ const styles = {
 ```
 
 The config above will create a new CSS bundle called `bundle.css` in the `dist/css` folder consisting of the compiled sass from all of the files in the `assets/sass` folder.
+
+## License
+
+The code is available under the [MIT License](LICENSE.md).
