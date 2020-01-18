@@ -2,16 +2,13 @@
   "name": "gulp-boilerplate",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "main": "gulpfile.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/benfeather/gulp-boilerplate.git"
   },
   "author": "Ben Feather",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/benfeather/gulp-boilerplate/issues"
   },
