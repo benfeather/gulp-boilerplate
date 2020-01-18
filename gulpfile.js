@@ -204,7 +204,7 @@ if (styles.enabled) {
 					errorHandler: error
 				}),
 
-				// Init the sourcemap
+				// Init the source map
 				gulpIf(styles.sourcemaps, sourcemaps.init()),
 
 				// Compile sass
@@ -218,7 +218,7 @@ if (styles.enabled) {
 					basename: bundle.name
 				}),
 
-				// Output the sourcemap
+				// Output the source map
 				gulpIf(styles.sourcemaps, sourcemaps.write('.')),
 
 				// Output the compiled css
