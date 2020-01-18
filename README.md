@@ -53,11 +53,11 @@ Using the settings you can:
   - Enable/disable all of the related tasks
   - Enable/disble directory "cleaning"
   - Enable/disable source maps
-  - etc.
+  - Create new code bundles
 
 ### Bundles
 
-This boilerplate allows you to create separate files ("bundles") by simply adding objects to the bundles array in the task config:
+You can create separate files ("bundles") by simply adding objects to the bundles array in the task config.
 
 ```js
 const styles = {
@@ -73,6 +73,4 @@ const styles = {
 };
 ```
 
-The config above will create a new CSS bundle called `bundle.css` in the `dist/css` folder. 
-
-This bundle will consist of the compiled sass from all of the files in the `assets/sass` folder.
+The config above will create a new CSS bundle called `bundle.css` in the `dist/css` folder consisting of the compiled sass from all of the files in the `assets/sass` folder.
