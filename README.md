@@ -72,3 +72,9 @@ const styles = {
 	]
 };
 ```
+
+The config above will create a new CSS file (bundle) called `bundle.css` in the `dist/css` folder. 
+
+The contents of this file will be the compiled Sass from the files in the `assets/sass` folder with the `.sass` or `.scss` file extensions.
+
+You can create another bundle by adding a new object to the `bundles` array.
