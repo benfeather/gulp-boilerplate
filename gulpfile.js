@@ -47,10 +47,6 @@ const styles = {
 	minify: true,
 	prefix: true,
 	sourcemaps: true,
-	lint: {
-		enabled: true,
-		input: './assets/sass/**/*.{scss,sass}'
-	},
 	bundles: [
 		{
 			name: 'main',
@@ -66,10 +62,6 @@ const scripts = {
 	clean: true,
 	minify: true,
 	sourcemaps: true,
-	lint: {
-		enabled: true,
-		input: './assets/js/**/*.js'
-	},
 	bundles: [
 		{
 			name: 'main',
@@ -111,7 +103,7 @@ const copy = {
 
 // Config: Server with LiveReload
 const server = {
-	enabled: true,
+	enabled: false,
 	watch: './index.html',
 	config: {
 		server: '.'
@@ -193,6 +185,7 @@ if (styles.enabled) {
 	styles.bundles.forEach((bundle) => {
 		const buildName = `build:css:${bundle.name}`;
 		const watchName = `watch:css:${bundle.name}`;
+		const lintName = `lint:css:${bundle.name}`;
 
 		addTask(buildName, (done) => {
 			pipeline(
@@ -233,34 +226,32 @@ if (styles.enabled) {
 		addTask(watchName, () => {
 			watch(bundle.input, getTasks(buildName));
 		});
+
+		addTask(lintName, (done) => {
+			pipeline(
+				// Get the source files
+				src(bundle.input),
+
+				// lint JS
+				stylelint({
+					reporters: [{formatter: 'string', console: true}]
+				})
+			);
+			done();
+		});
 	});
-}
 
-if (styles.lint.enabled) {
-	addTask('lint:css', (done) => {
-		pipeline(
-			// Get the source files
-			src(styles.lint.input),
+	if (styles.clean) {
+		addTask('clean:css', (done) => {
+			const toDelete = [];
 
-			// lint JS
-			stylelint({
-				reporters: [{formatter: 'string', console: true}]
-			})
-		);
-		done();
-	});
-}
+			styles.bundles.forEach((bundle) => toDelete.push(bundle.output));
 
-if (styles.clean) {
-	addTask('clean:css', (done) => {
-		const toDelete = [];
+			del.sync([...new Set(toDelete)]); // Clean unique paths only
 
-		styles.bundles.forEach((bundle) => toDelete.push(bundle.output));
-
-		del.sync([...new Set(toDelete)]); // Clean unique paths only
-
-		done();
-	});
+			done();
+		});
+	}
 }
 
 // --------------------------------------------------
@@ -271,6 +262,7 @@ if (scripts.enabled) {
 	scripts.bundles.forEach((bundle) => {
 		const buildName = `build:js:${bundle.name}`;
 		const watchName = `watch:js:${bundle.name}`;
+		const lintName = `lint:js:${bundle.name}`;
 
 		addTask(buildName, (done) => {
 			pipeline(
@@ -312,35 +304,33 @@ if (scripts.enabled) {
 		addTask(watchName, () => {
 			watch(bundle.input, getTasks(buildName));
 		});
+
+		addTask(lintName, (done) => {
+			pipeline(
+				// Get the source files
+				src(bundle.input),
+
+				// lint JS
+				eslint(),
+
+				// Output problems
+				eslint.format()
+			);
+			done();
+		});
 	});
-}
 
-if (scripts.lint.enabled) {
-	addTask('lint:js', (done) => {
-		pipeline(
-			// Get the source files
-			src(scripts.lint.input),
+	if (scripts.clean) {
+		addTask('clean:js', (done) => {
+			const toDelete = [];
 
-			// lint JS
-			eslint(),
+			scripts.bundles.forEach((bundle) => toDelete.push(bundle.output));
 
-			// Output problems
-			eslint.format()
-		);
-		done();
-	});
-}
+			del.sync([...new Set(toDelete)]); // Clean unique paths only
 
-if (scripts.clean) {
-	addTask('clean:js', (done) => {
-		const toDelete = [];
-
-		scripts.bundles.forEach((bundle) => toDelete.push(bundle.output));
-
-		del.sync([...new Set(toDelete)]); // Clean unique paths only
-
-		done();
-	});
+			done();
+		});
+	}
 }
 
 // --------------------------------------------------
@@ -370,13 +360,13 @@ if (images.enabled) {
 	addTask(watchName, () => {
 		watch(images.input, getTasks(buildName));
 	});
-}
 
-if (images.clean) {
-	addTask('clean:img', (done) => {
-		del.sync(images.output);
-		done();
-	});
+	if (images.clean) {
+		addTask('clean:img', (done) => {
+			del.sync(images.output);
+			done();
+		});
+	}
 }
 
 // --------------------------------------------------
@@ -403,18 +393,18 @@ if (copy.enabled) {
 			watch(bundle.input, getTasks(buildName));
 		});
 	});
-}
 
-if (copy.clean) {
-	addTask('clean:copy', (done) => {
-		const toDelete = [];
+	if (copy.clean) {
+		addTask('clean:copy', (done) => {
+			const toDelete = [];
 
-		copy.bundles.forEach((bundle) => toDelete.push(bundle.output));
+			copy.bundles.forEach((bundle) => toDelete.push(bundle.output));
 
-		del.sync([...new Set(toDelete)]); // Clean unique paths only
+			del.sync([...new Set(toDelete)]); // Clean unique paths only
 
-		done();
-	});
+			done();
+		});
+	}
 }
 
 // --------------------------------------------------
