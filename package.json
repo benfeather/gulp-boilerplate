@@ -1,7 +1,7 @@
 {
   "name": "gulp-boilerplate",
   "version": "1.0.0",
-  "description": "",
+  "description": "A gulp 4.x boilerplate with support for SASS/SCSS, babel, eslint, stylelint, prettier, image optimization and more!",
   "main": "gulpfile.js",
   "repository": {
     "type": "git",
