@@ -67,11 +67,11 @@ const copy = {
 
 // Config: Server with LiveReload
 const server = {
-	enabled: false,
-	watch: './index.html',
+	enabled: true,
+	watch: './*.html',
 	config: {
 		server: '.'
-		//proxy: "http://localhost/"
+		//proxy: 'http://localhost/'
 	}
 };
 
@@ -417,20 +417,10 @@ if (copy.enabled) {
 
 // prettier-ignore
 module.exports = {
+    'watch': 		parallel(getTasks('watch')),
+	'serve': 		parallel(getTasks('serve'), getTasks('watch')),
 	'clean': 		series(getTasks('clean')),
-	'serve': 		series(getTasks('serve')),
-	'build:css': 	series(getTasks('build:css')),
-	'build:js': 	series(getTasks('build:js')),
-	'build:copy': 	series(getTasks('build:copy')),
-	'build:img': 	series(getTasks('build:img')),
 	'build': 		series(getTasks('build')),
-	'watch:css': 	parallel(getTasks('watch:css')),
-	'watch:js': 	parallel(getTasks('watch:js')),
-	'watch:copy': 	parallel(getTasks('watch:copy')),
-	'watch:img': 	parallel(getTasks('watch:img')),
-	'watch': 		parallel(getTasks('watch')),
-	'lint:js': 		series(getTasks('lint:js')),
-	'lint:css': 	series(getTasks('lint:css')),
 	'lint': 		series(getTasks('lint')),
 	'default': 		series(
 						series(getTasks('clean')),
