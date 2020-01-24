@@ -86,13 +86,21 @@ footer {
 	}
 }
 
-.container {
+@mixin make-container {
 	display: block;
 	width: 100%;
 	margin-left: auto;
 	margin-right: auto;
 	padding-left: 20px;
 	padding-right: 20px;
+}
+
+.container-fluid {
+	@include make-container();
+}
+
+.container {
+	@extend .container-fluid;
 
 	@media (min-width: 1200px) {
 		max-width: 1240px;
