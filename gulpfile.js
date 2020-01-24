@@ -232,8 +232,9 @@ if (styles.enabled) {
 				// Get the source files
 				src(bundle.input),
 
-				// lint JS
+				// Lint CSS
 				stylelint({
+					fix: true,
 					reporters: [{formatter: 'string', console: true}]
 				})
 			);
@@ -311,7 +312,10 @@ if (scripts.enabled) {
 				src(bundle.input),
 
 				// lint JS
-				eslint(),
+				eslint({
+					fix: true,
+					globals: ['jQuery', '$']
+				}),
 
 				// Output problems
 				eslint.format()
