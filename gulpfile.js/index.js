@@ -7,8 +7,8 @@ const {series, parallel} = require('gulp');
 
 // Require: Tasks
 const clean = require('./tasks/clean');
-const css = require('./tasks/styles');
-const js = require('./tasks/scripts');
+const scss = require('./tasks/scss');
+const js = require('./tasks/javascript');
 const copy = require('./tasks/copy');
 const img = require('./tasks/images');
 const serve = require('./tasks/serve');
@@ -20,7 +20,7 @@ const serve = require('./tasks/serve');
 const TaskFactory = require('./utilities/task-factory');
 const Tasks = new TaskFactory([
 	...clean,
-	...css,
+	...scss,
 	...js,
 	...copy,
 	...img,

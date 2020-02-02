@@ -39,9 +39,9 @@ if (config.enabled) {
 	if (config.minify) processors.push(cssnano);
 
 	config.bundles.forEach((bundle) => {
-		const buildName = `build: (css) - ${bundle.name}`;
-		const watchName = `watch: (css) - ${bundle.name}`;
-		const lintName = `lint: (css) - ${bundle.name}`;
+		const buildName = `build: (scss) - ${bundle.name}`;
+		const watchName = `watch: (scss) - ${bundle.name}`;
+		const lintName = `lint: (scss) - ${bundle.name}`;
 
 		Tasks.add(buildName, (done) => {
 			pipeline(

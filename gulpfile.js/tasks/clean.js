@@ -21,9 +21,8 @@ const Tasks = new TaskFactory();
 
 if (config.enabled) {
 	Tasks.add('clean', (done) => {
-		// Delete all filed/folders
+		// Delete all files and folders
 		del.sync(config.input);
-
 		done();
 	});
 }
