@@ -2,7 +2,7 @@
 // Config: Sass/SCSS
 // --------------------------------------------------
 
-module.exports.styles = {
+module.exports.scss = {
 	enabled: true,
 	minify: true,
 	prefix: true,
@@ -25,7 +25,7 @@ module.exports.styles = {
 // Config: JavaScript
 // --------------------------------------------------
 
-module.exports.scripts = {
+module.exports.js = {
 	enabled: true,
 	minify: true,
 	sourcemaps: true,
@@ -51,7 +51,7 @@ module.exports.scripts = {
 // Config: Images
 // --------------------------------------------------
 
-module.exports.images = {
+module.exports.img = {
 	enabled: true,
 	input: './assets/images/**/*.{png,jpg,jpeg,gif,svg}',
 	output: './dist/images/'

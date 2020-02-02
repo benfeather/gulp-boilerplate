@@ -3,7 +3,7 @@
 // --------------------------------------------------
 
 // Require: Config
-const config = require('../config').scripts;
+const config = require('../config').js;
 
 // Require: Gulp
 const {src, dest, watch} = require('gulp');
