@@ -17,7 +17,7 @@ const serve = require('./tasks/serve');
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('./utilities/tasks');
+const TaskFactory = require('./utilities/task-factory');
 const Tasks = new TaskFactory([
 	...clean,
 	...css,

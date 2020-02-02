@@ -14,7 +14,7 @@ const plumber = require('gulp-plumber');
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('../utilities/tasks');
+const TaskFactory = require('../utilities/task-factory');
 const Tasks = new TaskFactory();
 
 // --------------------------------------------------

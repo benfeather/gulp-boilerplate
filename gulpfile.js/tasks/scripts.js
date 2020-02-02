@@ -22,7 +22,7 @@ const eslint = require('gulp-eslint');
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('../utilities/tasks');
+const TaskFactory = require('../utilities/task-factory');
 const Tasks = new TaskFactory();
 
 // --------------------------------------------------
