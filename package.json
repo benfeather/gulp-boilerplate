@@ -1,18 +1,24 @@
 {
   "name": "gulp-boilerplate",
   "version": "1.0.0",
-  "description": "A gulp 4.x boilerplate with support for SASS/SCSS, babel, eslint, stylelint, prettier, image optimization and more!",
-  "main": "gulpfile.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/benfeather/gulp-boilerplate.git"
-  },
+  "description": "A clean, modern gulp 4.x boilerplate for your next frontend project.",
+  "keywords": [
+    "gulp",
+    "gulp-boilerplate",
+    "sass",
+    "scss",
+    "stylelint",
+    "babel",
+    "eslint",
+    "prettier",
+    "imagemin"
+  ],
+  "main": "gulpfile.js/index.js",
   "author": "Ben Feather",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/benfeather/gulp-boilerplate/issues"
-  },
+  "repository": "git+https://github.com/benfeather/gulp-boilerplate.git",
   "homepage": "https://github.com/benfeather/gulp-boilerplate#readme",
+  "bugs": "https://github.com/benfeather/gulp-boilerplate/issues",
   "devDependencies": {
     "@babel/core": "^7.8.3",
     "@babel/preset-env": "^7.8.3",
