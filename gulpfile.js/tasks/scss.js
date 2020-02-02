@@ -19,13 +19,13 @@ const stylelint = require('gulp-stylelint');
 const postcss = require('gulp-postcss');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
-const error = require('../utilities/error');
+const error = require('../util/error');
 
 // --------------------------------------------------
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('../utilities/task-factory');
+const TaskFactory = require('../util/task-factory');
 const Tasks = new TaskFactory();
 
 // --------------------------------------------------

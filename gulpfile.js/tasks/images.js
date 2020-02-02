@@ -17,7 +17,7 @@ const imagemin = require('gulp-imagemin');
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('../utilities/task-factory');
+const TaskFactory = require('../util/task-factory');
 const Tasks = new TaskFactory();
 
 // --------------------------------------------------
