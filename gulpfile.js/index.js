@@ -39,7 +39,6 @@ module.exports = {
 	'build': 		series(Tasks.get('build')),
 	'lint': 		series(Tasks.get('lint')),
 	'default': 		series(
-						series(Tasks.get('clean')),
 						series(Tasks.get('build')),
 						parallel(Tasks.get('serve'), Tasks.get('watch'))
 					)

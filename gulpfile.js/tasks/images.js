@@ -12,6 +12,7 @@ const plumber = require('gulp-plumber');
 
 // Require: Plugins
 const imagemin = require('gulp-imagemin');
+const cache = require('gulp-cache');
 
 // --------------------------------------------------
 // TaskFactory
@@ -37,9 +38,11 @@ if (config.enabled) {
 			plumber(),
 
 			// Optimise PNG, JPG, GIF and SVG images
-			imagemin({
-				silent: true
-			}),
+			cache(
+				imagemin({
+					silent: true
+				})
+			),
 
 			// Output
 			dest(config.output)
