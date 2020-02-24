@@ -9,7 +9,7 @@ const config = require('../config').serve;
 const {watch} = require('gulp');
 
 // Require: Plugins
-const browserSync = require('browser-sync');
+const browserSync = require('browser-sync').create('localhost');
 
 // --------------------------------------------------
 // TaskFactory
@@ -24,7 +24,6 @@ const Tasks = new TaskFactory();
 
 if (config.enabled) {
 	Tasks.add('serve', () => {
-		browserSync.create();
 		browserSync.init(config.config);
 		watch(config.watch).on('change', browserSync.reload);
 	});

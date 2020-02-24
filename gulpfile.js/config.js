@@ -1,4 +1,26 @@
 // --------------------------------------------------
+// Config: Serve
+// --------------------------------------------------
+
+module.exports.serve = {
+	enabled: true,
+	watch: ['./dist/images/**/*', './dist/fonts/**/*', './*.html'],
+	config: {
+		server: '.'
+		//proxy: 'http://localhost/'
+	}
+};
+
+// --------------------------------------------------
+// Config: Clean
+// --------------------------------------------------
+
+module.exports.clean = {
+	enabled: true,
+	input: './dist/*'
+};
+
+// --------------------------------------------------
 // Config: Sass/SCSS
 // --------------------------------------------------
 
@@ -48,25 +70,6 @@ module.exports.js = {
 };
 
 // --------------------------------------------------
-// Config: Images
-// --------------------------------------------------
-
-module.exports.img = {
-	enabled: true,
-	input: './assets/images/**/*.{png,jpg,jpeg,gif,svg}',
-	output: './dist/images/'
-};
-
-// --------------------------------------------------
-// Config: Clean
-// --------------------------------------------------
-
-module.exports.clean = {
-	enabled: true,
-	input: './dist/*'
-};
-
-// --------------------------------------------------
 // Config: Copy
 // --------------------------------------------------
 
@@ -82,14 +85,11 @@ module.exports.copy = {
 };
 
 // --------------------------------------------------
-// Config: Server
+// Config: Images
 // --------------------------------------------------
 
-module.exports.serve = {
+module.exports.img = {
 	enabled: true,
-	watch: ['./dist/**/*', './*.html'],
-	config: {
-		server: '.'
-		//proxy: 'http://localhost/'
-	}
+	input: './assets/images/**/*.{png,jpg,jpeg,gif,svg}',
+	output: './dist/images/'
 };

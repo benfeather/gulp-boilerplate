@@ -13,6 +13,7 @@ const gulpIf = require('gulp-if');
 
 // Require: Plugins
 const sourcemaps = require('gulp-sourcemaps');
+const browserSync = require('browser-sync').get('localhost');
 const rename = require('gulp-rename');
 const sass = require('gulp-sass');
 const stylelint = require('gulp-stylelint');
@@ -69,7 +70,10 @@ if (config.enabled) {
 				gulpIf(config.sourcemaps, sourcemaps.write('.')),
 
 				// Output
-				dest(bundle.output)
+				dest(bundle.output),
+
+				// Stream changes to server
+				browserSync.stream()
 			);
 			done();
 		});
