@@ -20,14 +20,14 @@
   "homepage": "https://github.com/benfeather/gulp-boilerplate#readme",
   "bugs": "https://github.com/benfeather/gulp-boilerplate/issues",
   "devDependencies": {
-    "@babel/core": "^7.8.3",
-    "@babel/preset-env": "^7.8.3",
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
     "autoprefixer": "^9.7.4",
     "browser-sync": "^2.26.7",
     "cssnano": "^4.1.10",
     "del": "^5.1.0",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.9.0",
+    "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
@@ -44,13 +44,13 @@
     "gulp-stylelint": "^11.0.0",
     "gulp-terser": "^1.2.0",
     "prettier": "^1.19.1",
-    "readable-stream": "^3.5.0",
+    "readable-stream": "^3.6.0",
     "string-kit": "^0.11.6",
     "stylelint": "^12.0.1",
     "stylelint-config-prettier": "^8.0.1",
-    "stylelint-config-recommended-scss": "^4.1.0",
+    "stylelint-config-recommended-scss": "^4.2.0",
     "stylelint-prettier": "^1.1.2",
-    "stylelint-scss": "^3.13.0"
+    "stylelint-scss": "^3.14.2"
   },
   "dependencies": {}
 }
