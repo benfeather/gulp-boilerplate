@@ -21,7 +21,13 @@
     "homepage": "https://github.com/benfeather/gulp-boilerplate#readme",
     "bugs": "https://github.com/benfeather/gulp-boilerplate/issues",
     "scripts": {
-        "browsers": "npx browserslist && npx browserslist --coverage && npx browserslist --coverage=NZ"
+        "browsers": "npx browserslist && npx browserslist --coverage && npx browserslist --coverage=NZ",
+        "watch": "gulp watch",
+        "serve": "gulp serve",
+        "clean": "gulp clean",
+        "build": "gulp build",
+        "lint": "gulp lint",
+        "default": "gulp"
     },
     "browserslist": [
         "last 3 android versions and not dead and > 0.01%",
