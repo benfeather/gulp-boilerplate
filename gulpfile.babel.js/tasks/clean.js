@@ -1,18 +1,15 @@
 // --------------------------------------------------
-// Require
+// Imports
 // --------------------------------------------------
 
-// Require: Config
-const config = require('../config').clean;
-
-// Require: Plugins
-const del = require('del');
+import {clean as config} from '../config';
+import del from 'del';
 
 // --------------------------------------------------
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('../util/task-factory');
+import TaskFactory from '../util/task-factory';
 const Tasks = new TaskFactory();
 
 // --------------------------------------------------
@@ -28,7 +25,7 @@ if (config.enabled) {
 }
 
 // --------------------------------------------------
-// Export Tasks
+// Export
 // --------------------------------------------------
 
 module.exports = Tasks.get();

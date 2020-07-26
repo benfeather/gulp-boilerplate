@@ -1,31 +1,32 @@
 // --------------------------------------------------
-// Require
+// Imports
 // --------------------------------------------------
 
-// Require: Config
-const config = require('../config').copy;
-
-// Require: Gulp
-const {src, dest, watch} = require('gulp');
-const pipeline = require('readable-stream').pipeline;
-const plumber = require('gulp-plumber');
+import {myConfig as config} from '../config';
+import {src, dest, watch} from 'gulp';
+import {pipeline} from 'readable-stream';
+import plumber from 'gulp-plumber';
 
 // --------------------------------------------------
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('../util/task-factory');
+import TaskFactory from '../util/task-factory';
 const Tasks = new TaskFactory();
 
 // --------------------------------------------------
-// Tasks: Copy
+// Tasks
 // --------------------------------------------------
 
 if (config.enabled) {
 	config.bundles.forEach((bundle) => {
-		const buildName = `build: (copy) - ${bundle.name}`;
-		const watchName = `watch: (copy) - ${bundle.name}`;
+		const buildName = `build: (img) - ${bundle.name}`;
+		const watchName = `watch: (img) - ${bundle.name}`;
 
+		// Options
+		const options = {...config.options, ...bundle.options};
+
+		// Build
 		Tasks.add(buildName, (done) => {
 			pipeline(
 				// Input
@@ -34,12 +35,15 @@ if (config.enabled) {
 				// Init error handling
 				plumber(),
 
+				/*** Plugins Here! ***/
+
 				// Output
 				dest(bundle.output)
 			);
 			done();
 		});
 
+		// Watch
 		Tasks.add(watchName, () => {
 			watch(bundle.input, Tasks.get(buildName));
 		});
@@ -47,7 +51,7 @@ if (config.enabled) {
 }
 
 // --------------------------------------------------
-// Export Tasks
+// Export
 // --------------------------------------------------
 
 module.exports = Tasks.get();

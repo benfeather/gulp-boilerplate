@@ -1,65 +1,61 @@
 // --------------------------------------------------
-// Require
+// Imports
 // --------------------------------------------------
 
-// Require: Config
-const config = require('../config').scss;
-
-// Require: Gulp
-const {src, dest, watch} = require('gulp');
-const pipeline = require('readable-stream').pipeline;
-const plumber = require('gulp-plumber');
-const gulpIf = require('gulp-if');
-
-// Require: Plugins
-const sourcemaps = require('gulp-sourcemaps');
-const browserSync = require('browser-sync').get('localhost');
-const rename = require('gulp-rename');
-const sass = require('gulp-sass');
-const stylelint = require('gulp-stylelint');
-const postcss = require('gulp-postcss');
-const autoprefixer = require('autoprefixer');
-const cssnano = require('cssnano');
-const error = require('../util/error');
+import {scss as config} from '../config';
+import {src, dest, watch} from 'gulp';
+import {pipeline} from 'readable-stream';
+import plumber from 'gulp-plumber';
+import gulpIf from 'gulp-if';
+import sourcemaps from 'gulp-sourcemaps';
+import rename from 'gulp-rename';
+import sass from 'gulp-sass';
+import stylelint from 'gulp-stylelint';
+import postcss from 'gulp-postcss';
+import autoprefixer from 'autoprefixer';
+import cssnano from 'cssnano';
 
 // --------------------------------------------------
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('../util/task-factory');
+import TaskFactory from '../util/task-factory';
 const Tasks = new TaskFactory();
 
 // --------------------------------------------------
-// Tasks: Styles
+// Tasks
 // --------------------------------------------------
 
 if (config.enabled) {
-	const processors = [];
-
-	if (config.prefix) processors.push(autoprefixer);
-	if (config.minify) processors.push(cssnano);
-
 	config.bundles.forEach((bundle) => {
 		const buildName = `build: (scss) - ${bundle.name}`;
 		const watchName = `watch: (scss) - ${bundle.name}`;
 		const lintName = `lint: (scss) - ${bundle.name}`;
 
+		// Options
+		const options = {...config.options, ...bundle.options};
+		const plugins = [];
+
+		if (options.prefix) plugins.push(autoprefixer);
+		if (options.minify) plugins.push(cssnano);
+
+		// Build
 		Tasks.add(buildName, (done) => {
 			pipeline(
 				// Input
 				src(bundle.input),
 
 				// Init error handling
-				plumber({errorHandler: error}),
+				plumber(),
 
 				// Init the source map
-				gulpIf(config.sourcemaps, sourcemaps.init()),
+				gulpIf(options.sourcemaps, sourcemaps.init()),
 
 				// Compile sass
 				sass(),
 
-				// Apply the PostCSS processors
-				gulpIf(processors.length, postcss(processors)),
+				// Apply the PostCSS processors, if any
+				gulpIf(plugins.length, postcss(plugins)),
 
 				// Rename the output file
 				rename({
@@ -67,21 +63,20 @@ if (config.enabled) {
 				}),
 
 				// Output the source map
-				gulpIf(config.sourcemaps, sourcemaps.write('.')),
+				gulpIf(options.sourcemaps, sourcemaps.write('.')),
 
 				// Output
-				dest(bundle.output),
-
-				// Stream changes to server
-				browserSync.stream()
+				dest(bundle.output)
 			);
 			done();
 		});
 
+		// Watch
 		Tasks.add(watchName, () => {
 			watch(bundle.input, Tasks.get(buildName));
 		});
 
+		// Lint
 		Tasks.add(lintName, (done) => {
 			pipeline(
 				// Get the source files
@@ -99,7 +94,7 @@ if (config.enabled) {
 }
 
 // --------------------------------------------------
-// Export Tasks
+// Export
 // --------------------------------------------------
 
 module.exports = Tasks.get();

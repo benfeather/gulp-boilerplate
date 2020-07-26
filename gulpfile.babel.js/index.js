@@ -1,23 +1,20 @@
 // --------------------------------------------------
-// Require
+// Imports
 // --------------------------------------------------
 
-// Require: Gulp
-const {series, parallel} = require('gulp');
-
-// Require: Tasks
-const serve = require('./tasks/serve');
-const clean = require('./tasks/clean');
-const scss = require('./tasks/scss');
-const js = require('./tasks/javascript');
-const copy = require('./tasks/copy');
-const img = require('./tasks/images');
+import {series, parallel} from 'gulp';
+import serve from './tasks/serve';
+import clean from './tasks/clean';
+import scss from './tasks/scss';
+import js from './tasks/javascript';
+import copy from './tasks/copy';
+import img from './tasks/images';
 
 // --------------------------------------------------
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('./util/task-factory');
+import TaskFactory from './util/task-factory';
 const Tasks = new TaskFactory([
 	...serve,
 	...clean,

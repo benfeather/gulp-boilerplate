@@ -1,56 +1,147 @@
 {
-  "name": "gulp-boilerplate",
-  "version": "1.0.0",
-  "description": "A clean, modern Gulp 4.x boilerplate for your next frontend project.",
-  "keywords": [
-    "gulp",
-    "gulp-boilerplate",
-    "sass",
-    "scss",
-    "stylelint",
-    "babel",
-    "eslint",
-    "prettier",
-    "imagemin"
-  ],
-  "main": "gulpfile.js/index.js",
-  "author": "Ben Feather",
-  "license": "MIT",
-  "repository": "git+https://github.com/benfeather/gulp-boilerplate.git",
-  "homepage": "https://github.com/benfeather/gulp-boilerplate#readme",
-  "bugs": "https://github.com/benfeather/gulp-boilerplate/issues",
-  "devDependencies": {
-    "@babel/core": "^7.8.4",
-    "@babel/preset-env": "^7.8.4",
-    "autoprefixer": "^9.7.4",
-    "browser-sync": "^2.26.7",
-    "cssnano": "^4.1.10",
-    "del": "^5.1.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.0",
-    "eslint-plugin-prettier": "^3.1.2",
-    "gulp": "^4.0.2",
-    "gulp-babel": "^8.0.0",
-    "gulp-cache": "^1.1.3",
-    "gulp-concat": "^2.6.1",
-    "gulp-eslint": "^6.0.0",
-    "gulp-if": "^3.0.0",
-    "gulp-imagemin": "^6.2.0",
-    "gulp-plumber": "^1.2.1",
-    "gulp-postcss": "^8.0.0",
-    "gulp-rename": "^2.0.0",
-    "gulp-sass": "^4.0.2",
-    "gulp-sourcemaps": "^2.6.5",
-    "gulp-stylelint": "^11.0.0",
-    "gulp-terser": "^1.2.0",
-    "prettier": "^1.19.1",
-    "readable-stream": "^3.6.0",
-    "string-kit": "^0.11.6",
-    "stylelint": "^12.0.1",
-    "stylelint-config-prettier": "^8.0.1",
-    "stylelint-config-recommended-scss": "^4.2.0",
-    "stylelint-prettier": "^1.1.2",
-    "stylelint-scss": "^3.14.2"
-  },
-  "dependencies": {}
+    "name": "gulp-boilerplate",
+    "version": "1.0.0",
+    "description": "A clean, modern Gulp 4.x boilerplate for your next frontend project.",
+    "keywords": [
+        "gulp",
+        "gulp-boilerplate",
+        "sass",
+        "scss",
+        "stylelint",
+        "rollup",
+        "babel",
+        "eslint",
+        "prettier",
+        "imagemin"
+    ],
+    "main": "gulpfile.js/index.js",
+    "author": "Ben Feather",
+    "license": "MIT",
+    "repository": "git+https://github.com/benfeather/gulp-boilerplate.git",
+    "homepage": "https://github.com/benfeather/gulp-boilerplate#readme",
+    "bugs": "https://github.com/benfeather/gulp-boilerplate/issues",
+    "scripts": {
+        "browsers": "npx browserslist && npx browserslist --coverage && npx browserslist --coverage=NZ"
+    },
+    "browserslist": [
+        "last 3 android versions and not dead and > 0.01%",
+        "last 3 opera versions and not dead and > 0.01%",
+        "last 3 chrome versions and not dead and > 0.01%",
+        "last 3 and_chr versions and not dead and > 0.01%",
+        "last 3 firefox versions and not dead and > 0.01%",
+        "last 3 and_ff versions and not dead and > 0.01%",
+        "last 3 edge versions and not dead and > 0.01%",
+        "last 3 safari versions and not dead and > 0.01%",
+        "last 3 ios_saf versions and not dead and > 0.01%",
+        "last 3 samsung versions and not dead and > 0.01%"
+    ],
+    "babel": {
+        "presets": [
+            [
+                "@babel/preset-env",
+                {
+                    "targets": {
+                        "node": "current"
+                    }
+                }
+            ]
+        ],
+        "plugins": [
+            [
+                "@babel/plugin-transform-runtime"
+            ],
+            [
+                "@babel/plugin-proposal-class-properties",
+                {
+                    "loose": true
+                }
+            ]
+        ]
+    },
+    "eslintConfig": {
+        "extends": [
+            "eslint:recommended",
+            "plugin:prettier/recommended"
+        ],
+        "plugins": ["prettier"],
+        "env": {
+            "browser": true,
+            "node": false,
+            "commonjs": false,
+            "es2020": true,
+            "jquery": true
+        },
+        "parserOptions": {
+            "ecmaVersion": 2020,
+            "sourceType": "module"
+        },
+        "rules": {
+            "prettier/prettier": "error"
+        }
+    },
+    "stylelint": {
+        "extends": [
+            "stylelint-config-recommended-scss",
+            "stylelint-prettier/recommended"
+        ],
+        "plugins": ["stylelint-prettier"],
+        "rules": {
+            "prettier/prettier": true
+        }
+    },
+    "prettier": {
+        "printWidth": 80,
+        "tabWidth": 4,
+        "useTabs": true,
+        "semi": true,
+        "singleQuote": true,
+        "quoteProps": "consistent",
+        "trailingComma": "none",
+        "bracketSpacing": false,
+        "jsxBracketSameLine": false,
+        "arrowParens": "always",
+        "endOfLine": "crlf"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.10.5",
+        "@babel/plugin-proposal-class-properties": "^7.10.4",
+        "@babel/plugin-transform-runtime": "^7.10.5",
+        "@babel/preset-env": "^7.10.4",
+        "@babel/register": "^7.10.5",
+        "@babel/runtime": "^7.10.5",
+        "@rollup/plugin-babel": "^5.1.0",
+        "@rollup/plugin-commonjs": "^14.0.0",
+        "@rollup/plugin-multi-entry": "^3.0.1",
+        "@rollup/plugin-node-resolve": "^8.4.0",
+        "autoprefixer": "^9.8.5",
+        "browser-sync": "^2.26.10",
+        "core-js": "^3.6.5",
+        "cssnano": "^4.1.10",
+        "del": "^5.1.0",
+        "eslint": "^6.8.0",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-prettier": "^3.1.4",
+        "gulp": "^4.0.2",
+        "gulp-cache": "^1.1.3",
+        "gulp-eslint": "^6.0.0",
+        "gulp-if": "^3.0.0",
+        "gulp-imagemin": "^6.2.0",
+        "gulp-plumber": "^1.2.1",
+        "gulp-postcss": "^8.0.0",
+        "gulp-rename": "^2.0.0",
+        "gulp-sass": "^4.1.0",
+        "gulp-sourcemaps": "^2.6.5",
+        "gulp-stylelint": "^11.0.0",
+        "node-sass": "^4.14.1",
+        "prettier": "^1.19.1",
+        "readable-stream": "^3.6.0",
+        "rollup": "^2.23.0",
+        "rollup-plugin-terser": "^6.1.0",
+        "stylelint": "^12.0.1",
+        "stylelint-config-prettier": "^8.0.2",
+        "stylelint-config-recommended-scss": "^4.2.0",
+        "stylelint-prettier": "^1.1.2",
+        "stylelint-scss": "^3.18.0"
+    },
+    "dependencies": {}
 }

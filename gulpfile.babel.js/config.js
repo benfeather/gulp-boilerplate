@@ -4,8 +4,9 @@
 
 module.exports.serve = {
 	enabled: true,
-	watch: ['./dist/images/**/*', './dist/fonts/**/*', './*.html'],
-	config: {
+	watch: ['./dist/**/*', './*.html'],
+	options: {
+		open: false,
 		server: '.'
 		//proxy: 'http://localhost/'
 	}
@@ -26,9 +27,6 @@ module.exports.clean = {
 
 module.exports.scss = {
 	enabled: true,
-	minify: true,
-	prefix: true,
-	sourcemaps: true,
 	bundles: [
 		{
 			name: 'main',
@@ -40,7 +38,12 @@ module.exports.scss = {
 			input: './assets/sass/vendor.scss',
 			output: './dist/css/'
 		}
-	]
+	],
+	options: {
+		prefix: true,
+		minify: true,
+		sourcemaps: true
+	}
 };
 
 // --------------------------------------------------
@@ -49,24 +52,18 @@ module.exports.scss = {
 
 module.exports.js = {
 	enabled: true,
-	minify: true,
-	sourcemaps: true,
 	bundles: [
 		{
 			name: 'main',
-			input: [
-				'./assets/js/script-1.js',
-				'./assets/js/script-2.js',
-				'./assets/js/script-3.js'
-			],
-			output: './dist/js/'
-		},
-		{
-			name: 'vendor',
-			input: './node_modules/lodash/lodash.js',
+			input: './assets/js/app.js',
 			output: './dist/js/'
 		}
-	]
+	],
+	options: {
+		babel: true,
+		minify: true,
+		sourcemaps: true
+	}
 };
 
 // --------------------------------------------------
@@ -88,8 +85,16 @@ module.exports.copy = {
 // Config: Images
 // --------------------------------------------------
 
-module.exports.img = {
+module.exports.images = {
 	enabled: true,
-	input: './assets/images/**/*.{png,jpg,jpeg,gif,svg}',
-	output: './dist/images/'
+	bundles: [
+		{
+			name: 'images',
+			input: './assets/images/**/*.{png,jpg,jpeg,gif,svg}',
+			output: './dist/images/'
+		}
+	],
+	options: {
+		silent: true
+	}
 };

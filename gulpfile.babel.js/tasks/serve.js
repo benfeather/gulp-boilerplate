@@ -1,30 +1,27 @@
 // --------------------------------------------------
-// Require
+// Imports
 // --------------------------------------------------
 
-// Require: Config
-const config = require('../config').serve;
-
-// Require: Gulp
-const {watch} = require('gulp');
-
-// Require: Plugins
-const browserSync = require('browser-sync').create('localhost');
+import {serve as config} from '../config';
+import {watch} from 'gulp';
+import browserSync from 'browser-sync';
 
 // --------------------------------------------------
 // TaskFactory
 // --------------------------------------------------
 
-const TaskFactory = require('../util/task-factory');
+import TaskFactory from '../util/task-factory';
 const Tasks = new TaskFactory();
 
 // --------------------------------------------------
-// BrowserSync
+// Tasks
 // --------------------------------------------------
 
 if (config.enabled) {
+	browserSync.create('localhost');
+
 	Tasks.add('serve', () => {
-		browserSync.init(config.config);
+		browserSync.init(config.options);
 		watch(config.watch).on('change', browserSync.reload);
 	});
 }
