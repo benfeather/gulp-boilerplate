@@ -1,8 +1,4 @@
-// --------------------------------------------------
-// Config: Serve
-// --------------------------------------------------
-
-module.exports.serve = {
+export const serve = {
 	enabled: true,
 	watch: ['./dist/**/*', './*.html'],
 	options: {
@@ -12,20 +8,12 @@ module.exports.serve = {
 	}
 };
 
-// --------------------------------------------------
-// Config: Clean
-// --------------------------------------------------
-
-module.exports.clean = {
+export const clean = {
 	enabled: true,
 	input: './dist/*'
 };
 
-// --------------------------------------------------
-// Config: Sass/SCSS
-// --------------------------------------------------
-
-module.exports.scss = {
+export const scss = {
 	enabled: true,
 	bundles: [
 		{
@@ -46,11 +34,7 @@ module.exports.scss = {
 	}
 };
 
-// --------------------------------------------------
-// Config: JavaScript
-// --------------------------------------------------
-
-module.exports.js = {
+export const js = {
 	enabled: true,
 	bundles: [
 		{
@@ -66,11 +50,7 @@ module.exports.js = {
 	}
 };
 
-// --------------------------------------------------
-// Config: Copy
-// --------------------------------------------------
-
-module.exports.copy = {
+export const copy = {
 	enabled: true,
 	bundles: [
 		{
@@ -81,11 +61,7 @@ module.exports.copy = {
 	]
 };
 
-// --------------------------------------------------
-// Config: Images
-// --------------------------------------------------
-
-module.exports.images = {
+export const images = {
 	enabled: true,
 	bundles: [
 		{
