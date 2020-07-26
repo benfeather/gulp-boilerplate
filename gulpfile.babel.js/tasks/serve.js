@@ -30,4 +30,4 @@ if (config.enabled) {
 // Export
 // --------------------------------------------------
 
-module.exports = Tasks.taskList;
+export default Tasks.taskList;

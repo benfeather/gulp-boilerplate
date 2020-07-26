@@ -61,4 +61,4 @@ if (config.enabled) {
 // Export
 // --------------------------------------------------
 
-module.exports = Tasks.get();
+export default Tasks.get();
