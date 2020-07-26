@@ -48,4 +48,4 @@ class TaskFactory {
 // Exports
 // --------------------------------------------------
 
-module.exports = TaskFactory;
+export default TaskFactory;
