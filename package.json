@@ -1,6 +1,6 @@
 {
     "name": "gulp-boilerplate",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "A clean, modern Gulp 4.x boilerplate for your next frontend project.",
     "keywords": [
         "gulp",
@@ -14,7 +14,7 @@
         "prettier",
         "imagemin"
     ],
-    "main": "gulpfile.js/index.js",
+    "main": "gulpfile.babel.js/index.js",
     "author": "Ben Feather",
     "license": "MIT",
     "repository": "git+https://github.com/benfeather/gulp-boilerplate.git",
