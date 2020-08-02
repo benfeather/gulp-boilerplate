@@ -12,7 +12,7 @@ class TaskFactory {
 	 *  @param {function} func The function to name.
 	 */
 	nameFunc = (name, func) => {
-		Object.defineProperty(func, 'name', {value: name});
+		func.displayName = name;
 		return func;
 	};
 
@@ -32,7 +32,7 @@ class TaskFactory {
 		if (!name) return this.taskList;
 
 		const tasks = this.taskList.filter((task) =>
-			task.name.startsWith(name)
+			task.displayName.startsWith(name)
 		);
 
 		if (tasks.length == 0)
