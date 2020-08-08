@@ -36,14 +36,14 @@ if (config.enabled) {
 
 		plugins.push(multi());
 		plugins.push(resolve());
-		plugins.push(commonjs());
+		plugins.push(commonjs({sourceMap: false}));
 
 		if (options.babel) {
 			plugins.push(
 				babel({
 					babelrc: false,
 					babelHelpers: 'bundled',
-					exclude: ['**/node_modules/**'],
+					exclude: ['**/node_modules/**', '**/vendor/**'],
 					presets: [
 						[
 							'@babel/preset-env',
@@ -69,12 +69,12 @@ if (config.enabled) {
 		Tasks.add(buildName, async () => {
 			const code = await rollup({
 				input: bundle.input,
-				plugins: plugins
+				plugins
 			});
 
 			await code.write({
 				file: `${bundle.output}${bundle.name}.js`,
-				format: 'es',
+				format: 'cjs',
 				sourcemap: options.sourcemaps
 			});
 		});
