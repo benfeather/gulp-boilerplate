@@ -61,7 +61,7 @@ export const js = {
 	],
 	options: {
 		babel: true,
-		minify: true,
+		minify: false,
 		sourcemaps: true
 	}
 };
