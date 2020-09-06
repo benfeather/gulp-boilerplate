@@ -10,10 +10,10 @@ const isProduction = false;
 
 export const serve = {
 	enabled: true,
-	watch: ['./dist/**/*', './*.html'],
+	watch: ['./dist/**/*'],
 	options: {
 		open: false,
-		server: '.'
+		server: './dist/'
 		//proxy: 'http://localhost/'
 	}
 };
@@ -107,6 +107,11 @@ export const copy = {
 			name: 'fonts',
 			input: './assets/fonts/**/*.{eot,woff2,woff,ttf,svg}',
 			output: './dist/fonts/'
+		},
+		{
+			name: 'templates',
+			input: './assets/templates/**/*.html',
+			output: './dist/'
 		}
 	]
 };
