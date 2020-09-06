@@ -14,6 +14,9 @@ import stylelint from 'gulp-stylelint';
 import postcss from 'gulp-postcss';
 import autoprefixer from 'autoprefixer';
 import cssnano from 'cssnano';
+import ns from 'node-sass';
+
+sass.compiler = ns; // explicitly set the compiler to node-sass
 
 // --------------------------------------------------
 // TaskFactory
@@ -52,7 +55,7 @@ if (config.enabled) {
 				gulpIf(options.sourcemaps, sourcemaps.init()),
 
 				// Compile sass
-				sass(),
+				sass().on('error', sass.logError),
 
 				// Apply the PostCSS processors, if any
 				gulpIf(plugins.length, postcss(plugins)),
