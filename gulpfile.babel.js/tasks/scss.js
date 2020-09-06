@@ -28,9 +28,9 @@ const Tasks = new TaskFactory();
 
 if (config.enabled) {
 	config.bundles.forEach((bundle) => {
-		const buildName = `build: (scss) - ${bundle.name}`;
-		const watchName = `watch: (scss) - ${bundle.name}`;
-		const lintName = `lint: (scss) - ${bundle.name}`;
+		const buildName = `build: (scss) - ${bundle.id}`;
+		const watchName = `watch: (scss) - ${bundle.id}`;
+		const lintName = `lint: (scss) - ${bundle.id}`;
 
 		// Options
 		const options = {...config.options, ...bundle.options};
@@ -43,7 +43,7 @@ if (config.enabled) {
 		Tasks.add(buildName, (done) => {
 			pipeline(
 				// Input
-				src(bundle.input),
+				src(`${bundle.input.path}${bundle.input.file}.{css,sass,scss}`),
 
 				// Init error handling
 				plumber(),
@@ -57,30 +57,30 @@ if (config.enabled) {
 				// Apply the PostCSS processors, if any
 				gulpIf(plugins.length, postcss(plugins)),
 
-				// Rename the output file
-				rename({
-					basename: bundle.name
-				}),
-
 				// Output the source map
 				gulpIf(options.sourcemaps, sourcemaps.write('.')),
 
+				// Rename the output file
+				rename({
+					basename: bundle.output.file
+				}),
+
 				// Output
-				dest(bundle.output)
+				dest(bundle.output.path)
 			);
 			done();
 		});
 
 		// Watch
 		Tasks.add(watchName, () => {
-			watch(bundle.input, Tasks.get(buildName));
+			watch(bundle.watch, Tasks.get(buildName));
 		});
 
 		// Lint
 		Tasks.add(lintName, (done) => {
 			pipeline(
 				// Get the source files
-				src(bundle.input),
+				src(bundle.lint),
 
 				// Lint CSS
 				stylelint({

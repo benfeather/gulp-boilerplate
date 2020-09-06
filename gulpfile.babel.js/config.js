@@ -1,4 +1,10 @@
 // --------------------------------------------------
+// Misc
+// --------------------------------------------------
+
+const isProduction = false;
+
+// --------------------------------------------------
 // Config: Serve
 // --------------------------------------------------
 
@@ -29,19 +35,35 @@ export const scss = {
 	enabled: true,
 	bundles: [
 		{
-			name: 'main',
-			input: './assets/sass/styles.scss',
-			output: './dist/css/'
+			id: 'main',
+			input: {
+				path: './assets/sass/',
+				file: 'styles'
+			},
+			output: {
+				path: './dist/css/',
+				file: 'main'
+			},
+			watch: './assets/sass/**/*.{css,sass,scss}',
+			lint: './assets/sass/**/*.{css,sass,scss}'
 		},
 		{
-			name: 'vendor',
-			input: './assets/sass/vendor.scss',
-			output: './dist/css/'
+			id: 'vendor',
+			input: {
+				path: './assets/sass/',
+				file: 'vendor'
+			},
+			output: {
+				path: './dist/css/',
+				file: 'vendor'
+			},
+			watch: './assets/sass/**/*.{css,sass,scss}',
+			lint: './assets/sass/**/*.{css,sass,scss}'
 		}
 	],
 	options: {
-		prefix: true,
-		minify: true,
+		prefix: isProduction,
+		minify: isProduction,
 		sourcemaps: true
 	}
 };
@@ -54,14 +76,22 @@ export const js = {
 	enabled: true,
 	bundles: [
 		{
-			name: 'main',
-			input: './assets/js/app.js',
-			output: './dist/js/'
+			id: 'main',
+			input: {
+				path: './assets/js/',
+				file: 'app'
+			},
+			output: {
+				path: './dist/js/',
+				file: 'main'
+			},
+			watch: './assets/js/**/*.js',
+			lint: ['./assets/js/**/*.js', '!**/vendor/**']
 		}
 	],
 	options: {
-		babel: true,
-		minify: false,
+		babel: isProduction,
+		minify: isProduction,
 		sourcemaps: true
 	}
 };

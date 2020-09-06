@@ -26,9 +26,9 @@ const Tasks = new TaskFactory();
 
 if (config.enabled) {
 	config.bundles.forEach((bundle) => {
-		const buildName = `build: (js) - ${bundle.name}`;
-		const watchName = `watch: (js) - ${bundle.name}`;
-		const lintName = `lint: (js) - ${bundle.name}`;
+		const buildName = `build: (js) - ${bundle.id}`;
+		const watchName = `watch: (js) - ${bundle.id}`;
+		const lintName = `lint: (js) - ${bundle.id}`;
 
 		// Options
 		const options = {...config.options, ...bundle.options};
@@ -68,12 +68,12 @@ if (config.enabled) {
 		// Build
 		Tasks.add(buildName, async () => {
 			const code = await rollup({
-				input: bundle.input,
+				input: `${bundle.input.path}${bundle.input.file}.js`,
 				plugins
 			});
 
 			await code.write({
-				file: `${bundle.output}${bundle.name}.js`,
+				file: `${bundle.output.path}${bundle.output.file}.js`,
 				format: 'cjs',
 				sourcemap: options.sourcemaps
 			});
@@ -81,14 +81,14 @@ if (config.enabled) {
 
 		// Watch
 		Tasks.add(watchName, () => {
-			watch(bundle.input, Tasks.get(buildName));
+			watch(bundle.watch, Tasks.get(buildName));
 		});
 
 		// Lint
 		Tasks.add(lintName, (done) => {
 			pipeline(
 				// Get the source files
-				src(bundle.input),
+				src(bundle.lint),
 
 				// Lint JS
 				eslint({
