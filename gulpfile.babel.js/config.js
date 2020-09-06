@@ -24,7 +24,7 @@ export const serve = {
 
 export const clean = {
 	enabled: true,
-	input: './dist/*'
+	input: './dist/'
 };
 
 // --------------------------------------------------

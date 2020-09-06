@@ -3,7 +3,7 @@
 // --------------------------------------------------
 
 import {clean as config} from '../config';
-import del from 'del';
+import fs from 'fs';
 
 // --------------------------------------------------
 // TaskFactory
@@ -18,8 +18,7 @@ const Tasks = new TaskFactory();
 
 if (config.enabled) {
 	Tasks.add('clean', (done) => {
-		// Delete all files and folders
-		del.sync(config.input);
+		fs.rmdirSync(config.input, {recursive: true});
 		done();
 	});
 }
