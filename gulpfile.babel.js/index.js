@@ -32,11 +32,11 @@ const Tasks = new TaskFactory([
 module.exports = {
     'watch': 		parallel(Tasks.get('watch')),
 	'serve': 		parallel(Tasks.get('watch'), Tasks.get('serve')),
-	'clean': 		series(Tasks.get('clean')),
-	'build': 		series(Tasks.get('build')),
-	'lint': 		series(Tasks.get('lint')),
+	'clean': 		parallel(Tasks.get('clean')),
+	'build': 		parallel(Tasks.get('build')),
+	'lint': 		parallel(Tasks.get('lint')),
 	'default': 		series(
-						series(Tasks.get('build')),
+                        parallel(Tasks.get('build')),
 						parallel(Tasks.get('serve'), Tasks.get('watch'))
 					)
 };
